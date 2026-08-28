@@ -37,7 +37,8 @@ public class SecurityConfig {
                                                                 "/error",
                                                                 "/about", "/contact", "/terms", "/privacy", "/refund",
                                                                 "/shipping",
-                                                                "/wishlist", "/wishlist/toggle")
+                                                                "/wishlist", "/wishlist/toggle",
+                                                                "/cart", "/checkout", "/checkout/**", "/api/cart/**", "/api/webhooks/**")
                                                 .permitAll()
                                                 .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
                                                 .anyRequest().authenticated())

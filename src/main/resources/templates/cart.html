@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - The Arts Arcade</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col">
+
+    <div th:replace="~{fragments/header :: navbar}"></div>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Your Shopping Cart</h1>
+            <p class="text-gray-500 text-sm mt-1">Review your items before proceeding to instant direct checkout.</p>
+        </div>
+
+        <div th:if="${cartItems == null or #lists.isEmpty(cartItems)}" class="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100 max-w-lg mx-auto my-12">
+            <div class="w-20 h-20 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+            </div>
+            <h2 class="text-xl font-bold text-gray-800 mb-2">Your cart is empty</h2>
+            <p class="text-gray-500 text-sm mb-6">Looks like you haven't added any artwork or products to your cart yet.</p>
+            <a href="/products" class="inline-flex items-center justify-center px-6 py-3 bg-rose-600 hover:bg-rose-700 text-white font-medium rounded-xl shadow-md transition-all">
+                Explore Art Collection
+            </a>
+        </div>
+
+        <div th:unless="${cartItems == null or #lists.isEmpty(cartItems)}" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Cart Items Table / List -->
+            <div class="lg:col-span-8 space-y-4">
+                <div th:each="item : ${cartItems}" th:id="'cart-row-' + ${item.productId}" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row items-center gap-4">
+                    <img th:src="${item.imageUrl != null ? item.imageUrl : '/images/logo.jpeg'}" th:alt="${item.name}" class="w-24 h-24 object-cover rounded-xl bg-gray-100 shrink-0">
+                    
+                    <div class="flex-grow text-center sm:text-left">
+                        <h3 class="font-semibold text-gray-900 text-lg" th:text="${item.name}">Art Piece Title</h3>
+                        <p class="text-rose-600 font-bold text-base mt-1">₹<span th:text="${#numbers.formatDecimal(item.price, 1, 2)}">0.00</span></p>
+                    </div>
+
+                    <div class="flex items-center gap-3 bg-gray-50 px-3 py-1.5 rounded-xl border border-gray-200">
+                        <button type="button" th:onclick="'updateQuantity(' + ${item.productId} + ', ' + ${item.quantity - 1} + ')'" class="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-rose-50 hover:text-rose-600 transition font-bold cursor-pointer">-</button>
+                        <span class="font-semibold text-gray-800 w-8 text-center" th:text="${item.quantity}">1</span>
+                        <button type="button" th:onclick="'updateQuantity(' + ${item.productId} + ', ' + ${item.quantity + 1} + ')'" class="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-gray-600 hover:bg-rose-50 hover:text-rose-600 transition font-bold cursor-pointer">+</button>
+                    </div>
+
+                    <div class="text-right font-bold text-gray-900 text-lg min-w-[90px]">
+                        ₹<span th:id="'item-total-' + ${item.productId}" th:text="${#numbers.formatDecimal(item.totalPrice, 1, 2)}">0.00</span>
+                    </div>
+
+                    <button type="button" th:onclick="'removeItem(' + ${item.productId} + ')'" class="text-gray-400 hover:text-red-500 p-2 transition cursor-pointer" title="Remove item">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Summary & Checkout Action -->
+            <div class="lg:col-span-4">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 sticky top-24">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">Order Summary</h2>
+
+                    <div class="space-y-3 border-b border-gray-100 pb-4 text-sm text-gray-600">
+                        <div class="flex justify-between">
+                            <span>Subtotal (<span id="cart-item-count" th:text="${cartCount}">0</span> items)</span>
+                            <span class="font-semibold text-gray-900">₹<span id="cart-subtotal" th:text="${#numbers.formatDecimal(cartTotal, 1, 2)}">0.00</span></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Shipping</span>
+                            <span class="text-emerald-600 font-semibold">FREE Direct Checkout</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between py-4 text-lg font-bold text-gray-900">
+                        <span>Total Payable</span>
+                        <span class="text-rose-600">₹<span id="cart-total" th:text="${#numbers.formatDecimal(cartTotal, 1, 2)}">0.00</span></span>
+                    </div>
+
+                    <a href="/checkout" class="w-full flex items-center justify-center gap-2 py-3.5 px-6 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-lg shadow-rose-200 transition-all text-base">
+                        <span>Proceed to Direct Checkout</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </a>
+
+                    <div class="mt-4 flex items-center justify-center gap-2 text-xs text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        <span>Secure Direct Checkout • Skipping Address</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <script>
+        function updateQuantity(productId, newQty) {
+            fetch('/api/cart/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'productId=' + productId + '&quantity=' + newQty
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                }
+            });
+        }
+
+        function removeItem(productId) {
+            fetch('/api/cart/remove', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'productId=' + productId
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                }
+            });
+        }
+    </script>
+</body>
+</html>

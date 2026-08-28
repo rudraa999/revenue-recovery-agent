@@ -63,22 +63,15 @@
 
     </a>
 
-    <!-- Add To Cart -> Order Now -->
-    <div class="px-4 pb-4 pt-2 bg-white shrink-0 mt-auto flex flex-col justify-end">
-        <a th:href="@{'https://wa.me/919822080206'(text=${'Hello, I would like to order ' + product.name})}"
-            target="_blank" rel="noopener noreferrer"
-            class="w-full bg-emerald-600 text-white py-2 md:py-2.5 px-1 md:px-3 rounded-xl hover:bg-emerald-700 transition duration-300 flex items-center justify-center gap-1 md:gap-1.5 text-[11px] sm:text-sm font-semibold shadow-md hover:shadow-lg transform active:scale-95 whitespace-nowrap m-0 mt-auto group/btn cursor-pointer">
-
-            <svg xmlns="http://www.w3.org/2000/svg"
-                class="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 shrink-0 group-hover/btn:scale-110 transition-transform duration-300"
-                fill="currentColor" viewBox="0 0 24 24">
-                <path
-                    d="M11.996 0C5.372 0 0 5.374 0 12.002c0 2.126.552 4.192 1.602 6.01L.068 24l6.126-1.607a11.96 11.96 0 005.802 1.503h.003c6.626 0 12-5.374 12-12.002C24 5.385 18.623 0 11.996 0zm0 21.902a9.96 9.96 0 01-5.086-1.39l-.364-.216-3.774.99.999-3.676-.237-.377A9.973 9.973 0 012.003 12c0-5.518 4.49-10.002 10.003-10.002 5.514 0 10 4.484 10 10.002 0 5.518-4.486 10.002-10 10.002zm5.48-7.5c-.302-.15-1.782-.88-2.057-.98-.276-.102-.477-.15-.678.15-.202.302-.78 1.03-.956 1.23-.175.2-.35.226-.65.076-.28-.15-1.29-.476-2.45-1.516-.91-.81-1.52-1.81-1.7-2.112-.175-.302-.018-.466.13-.616.134-.136.302-.352.452-.528.15-.176.202-.302.302-.502.1-.2.05-.376-.026-.526-.075-.15-.678-1.63-.928-2.23-.243-.586-.49-.506-.678-.515-.175-.01-.376-.01-.577-.01-.2 0-.528.075-.804.376-.276.302-1.054 1.03-1.054 2.51 0 1.48 1.08 2.914 1.23 3.115.15.2 2.128 3.245 5.155 4.546.72.31 1.28.496 1.714.636.722.23 1.38.197 1.9.12.585-.088 1.782-.728 2.033-1.432.25-.704.25-1.306.175-1.432-.075-.126-.276-.202-.577-.352z" />
+    <!-- Add To Cart Action -->
+    <div class="px-4 pb-4 pt-2 bg-white shrink-0 mt-auto flex justify-between items-center">
+        <button type="button" th:onclick="'addToCartGlobal(' + ${product.id} + ')'"
+            class="w-full bg-rose-600 text-white py-2.5 px-3 rounded-xl hover:bg-rose-700 transition duration-300 flex items-center justify-center gap-1.5 text-xs sm:text-sm font-semibold shadow-md active:scale-95 cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
-
-            <span class="truncate">Chat Now</span>
-
-        </a>
+            <span>Add to Cart</span>
+        </button>
     </div>
 
 </div>

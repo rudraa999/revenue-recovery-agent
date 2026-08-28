@@ -33,6 +33,20 @@
                     Wishlist
                 </a>
 
+                <!-- Cart -->
+                <a href="/cart"
+                    class="relative text-gray-700 hover:text-rose-600 font-medium transition duration-150 ease-in-out flex items-center gap-1.5">
+                    <div class="relative flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                        <span id="cart-badge" class="hidden absolute -top-2 -right-2 bg-rose-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
+                    </div>
+                    Cart
+                </a>
+
                 <!-- WhatsApp (Contact) -->
                 <!-- <a href="https://wa.me/919822080206" target="_blank" rel="noopener noreferrer"
                     class="text-gray-700 hover:text-green-500 font-medium transition-colors duration-300 flex items-center gap-1.5"
@@ -226,7 +240,44 @@
             });
 
             loadWishlistCount();
+            loadCartCount();
         });
+
+        function updateCartBadge(count) {
+            const badge = document.getElementById('cart-badge');
+            if (badge) {
+                badge.innerText = count;
+                if (count > 0) {
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            }
+        }
+
+        function loadCartCount() {
+            fetch('/api/cart/count')
+                .then(res => res.json())
+                .then(data => {
+                    updateCartBadge(data.count);
+                })
+                .catch(err => console.error('Error fetching cart count:', err));
+        }
+
+        function addToCartGlobal(productId, quantity) {
+            fetch('/api/cart/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'productId=' + productId + '&quantity=' + (quantity || 1)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    updateCartBadge(data.cartCount);
+                    alert("Added to cart successfully!");
+                }
+            });
+        }
 
         function updateWishlistBadge(count) {
             const badge = document.getElementById('wishlist-badge');
