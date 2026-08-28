@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Terms of Service - The Arts Arcade</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fcf9f9;
+        }
+
+        h1,
+        h2,
+        h3,
+        .serif-font {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+
+<body class="text-gray-800 flex flex-col min-h-screen">
+    <div th:replace="fragments/header :: navbar"></div>
+
+    <main class="flex-grow max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
+        <div class="glass-card rounded-2xl p-8 md:p-12 mb-10">
+            <h1 class="text-4xl font-bold text-gray-900 serif-font mb-8 border-b pb-4">Terms of Service</h1>
+
+            <div class="prose prose-rose max-w-none text-gray-700 leading-relaxed space-y-8">
+                <section>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">1. Introduction</h2>
+                    <p>Welcome to The Arts Arcade. These Terms of Service ("Terms") govern your access to and use of our
+                        website and services. By accessing or using the site, you agree to be bound by these Terms.</p>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">2. Use of Site</h2>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li>You must be at least 18 years of age, or the age of legal majority in your jurisdiction, to
+                            make purchases on our site.</li>
+                        <li>You agree to provide current, complete, and accurate purchase and account information for
+                            all purchases made at our store.</li>
+                        <li>You may not use our products for any illegal or unauthorized purpose, nor may you, in the
+                            use of the Service, violate any laws.</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">3. Intellectual Property</h2>
+                    <p>All content included on this site, such as text, graphics, logos, images, and software, is the
+                        property of The Arts Arcade or its content suppliers and protected by international copyright
+                        laws. The compilation of all content on this site is the exclusive property of The Arts Arcade.
+                    </p>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">4. Limitation of Liability</h2>
+                    <p>In no event shall The Arts Arcade, our directors, officers, employees, affiliates, agents,
+                        contractors, interns, suppliers, service providers or licensors be liable for any injury, loss,
+                        claim, or any direct, indirect, incidental, punitive, special, or consequential damages of any
+                        kind.</p>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">5. Changes to Terms</h2>
+                    <p>We reserve the right, at our sole discretion, to update, change or replace any part of these
+                        Terms of Service by posting updates and changes to our website. It is your responsibility to
+                        check our website periodically for changes.</p>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+
+</html>

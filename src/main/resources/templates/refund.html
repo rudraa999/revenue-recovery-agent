@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Refund Policy - The Arts Arcade</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fcf9f9;
+        }
+
+        h1,
+        h2,
+        h3,
+        .serif-font {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+
+<body class="text-gray-800 flex flex-col min-h-screen">
+    <div th:replace="fragments/header :: navbar"></div>
+
+    <main class="flex-grow max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
+        <div class="glass-card rounded-2xl p-8 md:p-12 mb-10">
+            <h1 class="text-4xl font-bold text-gray-900 serif-font mb-8 border-b pb-4">Refund Policy</h1>
+
+            <div class="prose prose-rose max-w-none text-gray-700 leading-relaxed space-y-8">
+                <section>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">1. Returns</h2>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li>Our return policy lasts for 14 days. If 14 days have gone by since your purchase,
+                            unfortunately, we can’t offer you a refund or exchange.</li>
+                        <li>To be eligible for a return, your item must be unused and in the same condition that you
+                            received it. It must also be in the original packaging.</li>
+                        <li>Custom or personalized products are strictly exempt from being returned.</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">2. Refunds</h2>
+                    <p>Once your return is received and inspected, we will send you an email to notify you that we have
+                        received your returned item. We will also notify you of the approval or rejection of your
+                        refund. If you are approved, then your refund will be processed, and a credit will automatically
+                        be applied to your credit card or original method of payment, within a certain amount of days.
+                    </p>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">3. Exchanges</h2>
+                    <p>We only replace items if they are defective or damaged. If you need to exchange it for the same
+                        item, send us an email at theartsarcade@gmail.com describing the defect alongside photographic
+                        evidence.</p>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">4. Shipping for Returns</h2>
+                    <p>You will be responsible for paying for your own shipping costs for returning your item. Shipping
+                        costs are non-refundable. If you receive a refund, the cost of return shipping will be deducted
+                        from your refund.</p>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+
+</html>

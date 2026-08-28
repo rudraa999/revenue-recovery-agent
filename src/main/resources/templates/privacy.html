@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Privacy Policy - The Arts Arcade</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fcf9f9;
+        }
+
+        h1,
+        h2,
+        h3,
+        .serif-font {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+
+<body class="text-gray-800 flex flex-col min-h-screen">
+    <div th:replace="fragments/header :: navbar"></div>
+
+    <main class="flex-grow max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
+        <div class="glass-card rounded-2xl p-8 md:p-12 mb-10">
+            <h1 class="text-4xl font-bold text-gray-900 serif-font mb-8 border-b pb-4">Privacy Policy</h1>
+
+            <div class="prose prose-rose max-w-none text-gray-700 leading-relaxed space-y-8">
+                <section>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">1. Information We Collect</h2>
+                    <p>When you visit the site, we collect certain information about your device, your interaction with
+                        the site, and information necessary to process your purchases. We may also collect additional
+                        information if you contact us for customer support.</p>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">2. How We Use Your Information</h2>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li><strong>To provide products or services to you:</strong> To process your payment
+                            information, arrange for shipping, and provide you with invoices and/or order confirmations.
+                        </li>
+                        <li><strong>To communicate with you:</strong> We use your personal information to communicate
+                            with you about your order or inquiries.</li>
+                        <li><strong>To improve our site:</strong> We use device information to screen for potential risk
+                            or fraud, and more generally to improve and optimize our site structure.</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">3. Data Security</h2>
+                    <p>We implement a variety of security measures to maintain the safety of your personal information
+                        when you place an order. However, no method of transmission over the Internet, or method of
+                        electronic storage, is 100% secure.</p>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">4. Sharing Personal Information</h2>
+                    <p>We share your Personal Information with service providers to help us provide our services and
+                        fulfill our contracts with you. For example, we use Stripe to power our online store checkout
+                        process.</p>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">5. Contact</h2>
+                    <p>For more information about our privacy practices, if you have questions, or if you would like to
+                        make a complaint, please contact us by e-mail at theartsarcade@gmail.com.</p>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Shipping Policy - The Arts Arcade</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fcf9f9;
+        }
+
+        h1,
+        h2,
+        h3,
+        .serif-font {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+
+<body class="text-gray-800 flex flex-col min-h-screen">
+    <div th:replace="fragments/header :: navbar"></div>
+
+    <main class="flex-grow max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
+        <div class="glass-card rounded-2xl p-8 md:p-12 mb-10">
+            <h1 class="text-4xl font-bold text-gray-900 serif-font mb-8 border-b pb-4">Shipping Policy</h1>
+
+            <div class="prose prose-rose max-w-none text-gray-700 leading-relaxed space-y-8">
+                <section>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">1. Processing Time</h2>
+                    <p>All orders are processed within 1-3 business days. Orders are not shipped or delivered on
+                        weekends or holidays.</p>
+                    <p>If we are experiencing a high volume of orders, shipments may be delayed by a few days. Please
+                        allow additional days in transit for delivery. If there will be a significant delay in shipment
+                        of your order, we will contact you via email or telephone.</p>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">2. Shipping Rates & Delivery Estimates</h2>
+                    <p>Shipping charges for your order will be calculated and displayed at checkout.</p>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li><strong>Standard Delivery:</strong> 3-5 business days.</li>
+                        <li><strong>Express Delivery:</strong> 1-2 business days.</li>
+                        <li><strong>Overnight Delivery:</strong> Next morning delivery for orders placed before 2 PM.
+                        </li>
+                    </ul>
+                    <p>Delivery delays can occasionally occur due to unforeseen external circumstances.</p>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">3. Restrictions</h2>
+                    <p>We currently do not ship outside the contiguous United States. We do not ship to P.O. boxes or
+                        APO/FPO addresses.</p>
+                </section>
+
+                <section>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">4. Damages</h2>
+                    <p>The Arts Arcade is not liable for any products damaged or lost during shipping. If you received
+                        your order damaged, please contact the shipment carrier to file a claim. Please save all
+                        packaging materials and damaged goods before filing a claim.</p>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+
+</html>

@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>The Arts Arcade - Premium Flowers</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fcf9f9;
+        }
+
+        h1,
+        h2,
+        h3,
+        .serif-font {
+            font-family: 'Playfair Display', serif;
+        }
+
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-word-1,
+        .animate-word-2,
+        .animate-word-3,
+        .animate-subheadline,
+        .animate-cta,
+        .page-fade {
+            opacity: 0;
+            animation: fadeSlideUp 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        .animate-word-1 {
+            animation-delay: 0.1s;
+        }
+
+        .animate-word-2 {
+            animation-delay: 0.3s;
+        }
+
+        .animate-word-3 {
+            animation-delay: 0.5s;
+        }
+
+        .animate-subheadline {
+            animation-delay: 0.7s;
+        }
+
+        .animate-cta {
+            animation-delay: 0.9s;
+        }
+
+        .page-fade {
+            animation-delay: 0.2s;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Floating blob animation */
+        @keyframes float-blob {
+            0% {
+                transform: translate(0px, 0px) scale(1) rotate(0deg);
+            }
+
+            33% {
+                transform: translate(30px, -50px) scale(1.1) rotate(10deg);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) scale(0.9) rotate(-10deg);
+            }
+
+            100% {
+                transform: translate(0px, 0px) scale(1) rotate(0deg);
+            }
+        }
+
+        .animate-blob-slow {
+            animation: float-blob 15s infinite alternate ease-in-out;
+        }
+
+        .animation-delay-2000 {
+            animation-delay: 2s;
+        }
+
+        .animation-delay-4000 {
+            animation-delay: 4s;
+        }
+
+        /* Bounce pulse for WhatsApp */
+        @keyframes custom-bounce {
+
+            0%,
+            100% {
+                transform: translateY(-5%) scale(1);
+                animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+            }
+
+            50% {
+                transform: translateY(0) scale(1.05);
+                animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+            }
+        }
+
+        .hover-bounce:hover {
+            animation: custom-bounce 1.5s infinite;
+        }
+
+        /* Real 3D Elements */
+        @media (min-width: 768px) {
+            .card-3d-wrapper {
+                perspective: 1200px;
+            }
+
+            .card-3d {
+                transform-style: preserve-3d;
+            }
+
+            .icon-3d {
+                transform: translateZ(40px);
+            }
+
+            .text-3d {
+                transform: translateZ(20px);
+            }
+        }
+
+        /* Essential Boutique Hero Animations */
+        @keyframes subtle-zoom {
+            0% {
+                transform: scale(1) translate(0, 0);
+            }
+
+            100% {
+                transform: scale(1.1) translate(-2%, -1%);
+            }
+        }
+
+        @keyframes glitter-float {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+
+            25% {
+                opacity: 0.6;
+            }
+
+            50% {
+                transform: translateY(-100px) translateX(20px);
+                opacity: 0.8;
+            }
+
+            75% {
+                opacity: 0.4;
+            }
+
+            100% {
+                transform: translateY(-200px) translateX(-10px);
+                opacity: 0;
+            }
+        }
+
+        @keyframes candle-aura {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.4;
+                filter: blur(40px);
+            }
+
+            50% {
+                transform: scale(1.2);
+                opacity: 0.7;
+                filter: blur(60px);
+            }
+        }
+
+        .glitter-particle {
+            position: absolute;
+            background: radial-gradient(circle, #fff 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+            animation: glitter-float linear infinite;
+        }
+
+        .card-3d {
+            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.5s ease;
+        }
+
+        .card-3d:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.08), -5px -5px 15px rgba(255, 255, 255, 0.6);
+        }
+
+        @media (min-width: 768px) {
+            .card-3d:hover {
+                transform: translateY(-10px) rotateX(4deg) rotateY(-4deg) scale(1.03);
+                box-shadow: 20px 20px 40px rgba(0, 0, 0, 0.08), -10px -10px 20px rgba(255, 255, 255, 0.6);
+            }
+        }
+
+        .icon-3d {
+            box-shadow: inset 2px 2px 6px rgba(255, 255, 255, 0.9), inset -3px -3px 8px rgba(0, 0, 0, 0.05), 0 12px 20px -5px rgba(0, 0, 0, 0.15);
+        }
+
+        .glass-panel {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 100%);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+        }
+
+        .glass-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, transparent 50%);
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body class="text-gray-800 flex flex-col w-full min-h-screen overflow-x-hidden">
+    <!-- Navbar -->
+    <div th:replace="fragments/header :: navbar"></div>
+
+    <!-- Premium Boutique Hero Section -->
+    <div
+        class="relative w-full z-40 overflow-hidden min-h-[75vh] lg:min-h-[85vh] flex items-center bg-[#020617] transition-all duration-700">
+
+        <!-- Cinematic Background Layer -->
+        <div class="absolute inset-0 -z-20 overflow-hidden">
+            <!-- Full-Bleed Artwork with High-End Framing -->
+            <img src="/images/hero-bg.jpg" alt="Artisan Composition"
+                class="w-full h-full object-cover object-[80%_center] opacity-80 animate-[subtle-zoom_60s_infinite_alternate_ease-in-out]">
+
+            <!-- Strategic Scrim Layers (Left-side Focus) -->
+            <div class="absolute inset-0 bg-gradient-to-r from-[#020617] via-[#020617]/80 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-[#fcf9f9] via-transparent to-transparent opacity-40">
+            </div>
+
+            <!-- Dedicated Candle Aura -->
+            <div
+                class="absolute top-[45%] right-[20%] w-[30vw] h-[30vw] bg-amber-200/20 rounded-full animate-candle-aura mix-blend-screen">
+            </div>
+        </div>
+
+        <!-- Boutique Glitter Particle System -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
+            <div class="glitter-particle w-1.5 h-1.5 left-[15%] bottom-[10%]"
+                style="animation-duration: 12s; animation-delay: 1s;"></div>
+            <div class="glitter-particle w-1 h-1 left-[40%] bottom-[20%]"
+                style="animation-duration: 15s; animation-delay: 3s;"></div>
+            <div class="glitter-particle w-2 h-2 left-[65%] bottom-[5%]"
+                style="animation-duration: 18s; animation-delay: 0s;"></div>
+            <div class="glitter-particle w-1 h-1 left-[85%] bottom-[15%]"
+                style="animation-duration: 14s; animation-delay: 5s;"></div>
+            <div class="glitter-particle w-3 h-3 left-[25%] bottom-[30%]"
+                style="animation-duration: 20s; animation-delay: 2s; opacity: 0.1;"></div>
+        </div>
+
+        <!-- Content Architecture -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 page-fade">
+
+            <div class="max-w-3xl text-center lg:text-left flex flex-col items-center lg:items-start">
+                <!-- Premium Tag -->
+                <div
+                    class="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/5 border border-white/10 text-white/90 text-sm md:text-base font-medium mb-10 shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md transform transition-transform duration-500 hover:scale-105">
+                    <span class="text-amber-400 rotate-45 scale-125">✦</span>
+                    <span class="tracking-[0.15em] uppercase text-xs sm:text-sm font-semibold">Luxury Handcrafted
+                        Artistry</span>
+                </div>
+
+                <!-- Main Statement -->
+                <h1
+                    class="text-6xl sm:text-7xl lg:text-8xl xl:text-9xl font-bold text-white mb-8 tracking-tighter leading-[0.9] drop-shadow-[0_15px_35px_rgba(0,0,0,0.6)]">
+                    <span class="animate-word-1 block opacity-80 italic font-light tracking-normal mb-2">The Arts</span>
+                    <span
+                        class="animate-word-2 block bg-clip-text text-transparent bg-gradient-to-br from-white via-amber-100 to-rose-100 drop-shadow-sm serif-font">Arcade</span>
+                </h1>
+
+                <!-- Brand Story -->
+                <p
+                    class="text-lg sm:text-xl md:text-2xl text-gray-200/90 mb-12 max-w-2xl font-light animate-subheadline leading-relaxed tracking-wide drop-shadow-md">
+                    Luxury handcrafted art at accessible prices—because true creativity can’t be measured.
+                    <br>✨Explore more to get them soon!!!!
+                </p>
+
+                <!-- Call to Action -->
+                <div class="flex flex-col sm:flex-row gap-6 animate-cta w-full sm:w-auto">
+                    <a href="#categories"
+                        class="group relative inline-flex items-center justify-center px-12 py-5 overflow-hidden font-bold rounded-full transition-all duration-300 active:scale-95 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.5)]">
+                        <span
+                            class="absolute inset-0 w-full h-full bg-gradient-to-r from-rose-600 to-pink-500 group-hover:from-rose-500 group-hover:to-pink-400"></span>
+                        <span class="relative text-white flex items-center gap-3 text-lg md:text-xl">
+                            Discover Collection <span
+                                class="transition-transform duration-300 group-hover:translate-x-2">→</span>
+                        </span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Elegant Page Transition -->
+        <div
+            class="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-[#fcf9f9] to-transparent pointer-events-none">
+        </div>
+    </div>
+    </div>
+    </div>
+
+
+
+    <!-- Main Content Area -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 flex-grow">
+
+        <!-- Category Exploration Grid -->
+        <div id="categories" class="mb-10 mt-2 md:mt-4">
+            <div
+                class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-2 sm:px-0 sm:gap-5 lg:gap-6 bg-transparent">
+                <!-- Repeated Category Component -->
+                <div th:each="cat, iterStat : ${categoryDisplayList}"
+                    th:style="'animation-delay: ' + (${iterStat.index} * 0.1 + 0.3) + 's;'"
+                    class="page-fade card-3d-wrapper relative">
+                    <a th:href="@{/products(category=${cat.name})}"
+                        class="card-3d glass-panel flex flex-col items-center justify-center p-4 sm:p-5 lg:p-6 rounded-2xl relative group cursor-pointer text-decoration-none h-full w-full">
+
+                        <div
+                            class="icon-3d bg-gradient-to-br from-white via-white to-gray-50 flex items-center justify-center w-[60px] h-[60px] sm:w-[70px] sm:h-[70px] md:w-[80px] md:h-[80px] rounded-full mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                            <span class="text-2xl sm:text-3xl md:text-4xl drop-shadow-sm md:drop-shadow-md"
+                                th:text="${cat.icon}"></span>
+                        </div>
+
+                        <h3 class="text-3d text-sm sm:text-base md:text-lg lg:text-xl font-bold text-gray-900 text-center leading-tight group-hover:text-rose-500 transition-colors bg-white/80 backdrop-blur-sm px-4 py-1.5 md:px-5 md:py-2 rounded-full"
+                            th:text="${cat.name}">Category</h3>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trending Now Section -->
+        <div
+            th:if="${(keyword == null or #strings.isEmpty(keyword)) and (category == null or #strings.isEmpty(category)) and not #lists.isEmpty(trendingProducts)}">
+            <div class="flex justify-between items-end mb-6 border-b border-rose-100 pb-2">
+                <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 serif-font flex items-center gap-2">
+                    <span class="text-rose-500 animate-pulse">🔥</span> Trending Now
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 mb-12">
+                <th:block th:each="product : ${trendingProducts}">
+                    <div th:replace="~{fragments/product-card :: product-card}"></div>
+                </th:block>
+            </div>
+        </div>
+
+        <!-- Our Collection -->
+        <div class="flex justify-between items-end mb-6 border-b border-rose-100 pb-2">
+            <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 serif-font">Our Collection</h2>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+            <!-- Product Card -->
+            <th:block th:each="product : ${listProducts}">
+                <div th:replace="~{fragments/product-card :: product-card}"></div>
+            </th:block>
+
+            <!-- Empty state if no products -->
+            <div th:if="${#lists.isEmpty(listProducts)}" class="col-span-full py-12 text-center text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-300 mb-4" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p class="text-xl">No products found matching your criteria.</p>
+                <div class="mt-6">
+                    <a th:href="@{/}" class="text-rose-600 font-medium hover:underline">Clear all filters</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <!-- Whatsapp Floating CTA -->
+    <a href="https://wa.me/919822080206?text=Hello%2C%20I%20am%20exploring%20The%20Arts%20Arcade!" target="_blank"
+        rel="noopener noreferrer"
+        class="hidden md:flex fixed justify-center items-center bottom-6 right-6 z-50 bg-gradient-to-br from-[#25D366] to-[#128C7E] text-white p-4 rounded-full shadow-2xl hover:shadow-[#25D366]/50 hover-bounce animate-pulse hover:animate-none hover:-translate-y-2 hover:scale-110 transition-all duration-300 group border border-white/20">
+        <svg xmlns="http://www.w3.org/2000/svg"
+            class="h-8 w-8 text-white drop-shadow-md group-hover:scale-110 transition-transform duration-300"
+            fill="currentColor" viewBox="0 0 24 24">
+            <path
+                d="M11.996 0C5.372 0 0 5.374 0 12.002c0 2.126.552 4.192 1.602 6.01L.068 24l6.126-1.607a11.96 11.96 0 005.802 1.503h.003c6.626 0 12-5.374 12-12.002C24 5.385 18.623 0 11.996 0zm0 21.902a9.96 9.96 0 01-5.086-1.39l-.364-.216-3.774.99.999-3.676-.237-.377A9.973 9.973 0 012.003 12c0-5.518 4.49-10.002 10.003-10.002 5.514 0 10 4.484 10 10.002 0 5.518-4.486 10.002-10 10.002zm5.48-7.5c-.302-.15-1.782-.88-2.057-.98-.276-.102-.477-.15-.678.15-.202.302-.78 1.03-.956 1.23-.175.2-.35.226-.65.076-.28-.15-1.29-.476-2.45-1.516-.91-.81-1.52-1.81-1.7-2.112-.175-.302-.018-.466.13-.616.134-.136.302-.352.452-.528.15-.176.202-.302.302-.502.1-.2.05-.376-.026-.526-.075-.15-.678-1.63-.928-2.23-.243-.586-.49-.506-.678-.515-.175-.01-.376-.01-.577-.01-.2 0-.528.075-.804.376-.276.302-1.054 1.03-1.054 2.51 0 1.48 1.08 2.914 1.23 3.115.15.2 2.128 3.245 5.155 4.546.72.31 1.28.496 1.714.636.722.23 1.38.197 1.9.12.585-.088 1.782-.728 2.033-1.432.25-.704.25-1.306.175-1.432-.075-.126-.276-.202-.577-.352z" />
+        </svg>
+    </a>
+    </div>
+
+
+</body>
+
+</html>

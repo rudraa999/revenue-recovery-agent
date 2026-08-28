@@ -1,0 +1,63 @@
+Here is a breakdown of your Security and User Authentication architecture, structured exactly how you can explain it in an MCA technical interview.
+
+### 1. SecurityConfig.java (filterChain method & Roles)
+
+**Simple Explanation:**
+The `filterChain` method is the security bouncer for your application. It intercepts every single web request and decides what to do with it based on your rules:
+1. **`.csrf(...disable())`**: Temporarily turns off a specific security check. Normally, forms need a hidden "secret token" to prove they are legitimate. We disabled it here to make testing easier.
+2. **`.authorizeHttpRequests(...)`**: This is the rulebook.
+   - `permitAll()`: URLs like `/`, `/login`, `/register`, and CSS/image files are public. Anyone can see them without logging in.
+   - `hasAuthority("ROLE_ADMIN")`: Any URL starting with `/admin/` is strictly locked. The bouncer checks their ID badge, and if they don't have the `ROLE_ADMIN` stamp, they are rejected.
+   - `anyRequest().authenticated()`: Any other page we didn't explicitly mention requires the user to simply be logged in. 
+3. **`.formLogin(...)`**: Tells the app to use our custom HTML login page (`/login`) instead of a generic one. Upon success, it redirects the user to the home page (`/`).
+4. **`.logout(...)`**: Handles the cleanup. When someone goes to `/logout`, it redirects them to the login page with a success message, destroys their session on our server, and deletes their session cookie locally on their browser.
+5. **`.oauth2Login(...)`**: Wires up the "Login with Google" button. It tells the app to use our custom login page, and if Google successfully identifies the user, it passes that data to our `CustomOAuth2UserService` to handle the rest.
+
+**Distinguishing ADMIN and USER:**
+We distinguish them using the `.hasAuthority("ROLE_ADMIN")` rule. When a user logs in, Spring Security attaches a list of "Authorities" (roles) to their session. If a user with only `ROLE_USER` tries to visit `/admin/dashboard`, Spring checks their authorities, sees they lack `ROLE_ADMIN`, and blocks them (returns a 403 Forbidden error).
+
+**Technical Keywords for the Interview:**
+* **SecurityFilterChain**: The core Spring component that applies security filters to incoming HTTP requests.
+* **CSRF (Cross-Site Request Forgery)**: A web vulnerability. Disabling CSRF stops the requirement for CSRF tokens on state-changing requests (like POST/PUT).
+* **Authentication vs. Authorization**: `formLogin` handles *Authentication* (verifying *who* you are), while `authorizeHttpRequests` handles *Authorization* (verifying *what* you are allowed to do).
+* **GrantedAuthority**: The interface Spring Security uses internally to represent a privilege or a role.
+* **Session Invalidation**: The process of destroying the server-side `HttpSession` to securely terminate a logged-in user's state.
+
+---
+
+### 2. OAuth2 Integration
+
+**Simple Explanation:**
+When a user clicks "Login with Google," our app redirects them to Google's secure login screen. Once they approve, Google redirects them *back* to our app with a secret code. Spring Security automatically trades that code for their Google profile data (like email and name).
+
+**The role of `CustomOAuth2UserService`:** 
+This service acts as the bridge between Google's data and our database. When Google hands us the user's profile:
+1. It grabs the user's `email`.
+2. It asks our database: *"Do we already know this email?"*
+3. **If NO (New User):** It creates a brand new user in our database, gives them a random secure password, assigns them `ROLE_USER`, and marks their account provider as "GOOGLE".
+4. **If YES (Existing User):** It logs them in safely. If they originally registered with a normal email/password, it smoothly updates their account to say they are now logging in via Google (Account Consolidation).
+5. Finally, it tells Spring Security: *"This person is good to go, log them in as a `ROLE_USER`."*
+
+**Technical Keywords for the Interview:**
+* **OAuth2 Authorization Code Grant**: The specific industry-standard protocol flow our app uses to securely delegate authentication to Google.
+* **DefaultOAuth2UserService**: The base Spring Security class we override to intercept and process the user info returned by the OAuth2 provider.
+* **Principal**: In security terms, the currently authenticated user. The `OAuth2User` object we return becomes the Principal for this session.
+* **Account Consolidation/Merging**: How our system intelligently links a Google login to an existing standard account utilizing the same email address.
+
+---
+
+### 3. User Entity
+
+**Simple Explanation:**
+The `@Entity` annotation is how we tell Java that this code represents a real table in our MySQL database. Every variable inside this class (`username`, `email`, `password`) automatically becomes a column in the database table. The `@Id` marks the unique identifier (Primary Key) for every user, which automatically counts up (1, 2, 3...) because of `@GeneratedValue`. It also handles relationships, linking a User to their specific `Cart` or `Wishlist`.
+
+**Regarding the Role Enum:**
+*Note: Looking at your `User.java` file, you actually used `private String role;`, not an Enum!* However, an interviewer will heavily favor the use of Enums. If they ask why you *should* use a Role Enum instead of a String, here is the answer:
+
+Using an Enum (like `public enum Role { USER, ADMIN }`) instead of a plain String is a best practice because it provides strict rules. If you use a String, another developer might accidentally type `user.setRole("ROEL_ADMIN")` (a typo), and the system wouldn't catch it until it breaks. An Enum provides **Type-Safety**—it restricts the roles strictly to what is predefined, preventing bugs, typos, and making the code immensely more readable.
+
+**Technical Keywords for the Interview:**
+* **JPA (Java Persistence API) / Hibernate**: The ORM (Object-Relational Mapping) framework we use to map Java objects directly to database tables without writing raw SQL.
+* **Primary Key & Auto-Increment**: Represented by `@Id` and `GenerationType.IDENTITY`, ensuring no two users share the same database ID.
+* **Bidirectional Mapping**: Annotations like `@OneToOne` and `@OneToMany` that define how different database tables relate to each other (e.g., One User maps to Many Wishlist items).
+* **Compile-Time Type Safety**: The primary benefit of using an Enum. It shifts the burden of catching errors from when the app is running (Runtime) to when the code is compiling (Compile-Time).
