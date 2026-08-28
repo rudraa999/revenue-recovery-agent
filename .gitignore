@@ -1,43 +1,68 @@
 HELP.md
+
+# =========================
+# Maven / Java
+# =========================
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-### STS ###
+*.class
+
+# =========================
+# Spring Tool Suite
+# =========================
 .apt_generated
 .classpath
 .factorypath
 .project
-.settings
+.settings/
 .springBeans
 .sts4-cache
 
-### IntelliJ IDEA ###
-.idea
+# =========================
+# IntelliJ IDEA
+# =========================
+.idea/
 *.iws
 *.iml
 *.ipr
 
-### NetBeans ###
+# =========================
+# NetBeans
+# =========================
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
+
+# =========================
+# Build
+# =========================
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### VS Code ###
+# =========================
+# VS Code
+# =========================
 .vscode/
 
-# SENSITIVE DATA
+# =========================
+# Sensitive data
+# =========================
 .env
+.env.*
+!.env.example
+
 application-local.properties
 application-prod.properties
 
-# Logs and temporary files
+# =========================
+# Logs / temporary files
+# =========================
 *.log
 error_output.txt
 error_log.txt
@@ -46,12 +71,17 @@ run_error.log
 utf8_errors.log
 compile_errors.txt
 
-# Personal Scripts
-*.bat
-*.ps1
-replace.py
-
+# =========================
+# Node
+# =========================
 node_modules/
-package.json
-package-lock.json
-tailwind.config.js
+.npm/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================
+# OS
+# =========================
+.DS_Store
+Thumbs.db
