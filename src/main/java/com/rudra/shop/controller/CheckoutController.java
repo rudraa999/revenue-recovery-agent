@@ -36,6 +36,9 @@ public class CheckoutController {
     @Autowired
     private RevWinAgentService revWinAgentService;
 
+    @Autowired
+    private com.rudra.shop.repository.PaymentRiskRecordRepository riskRecordRepository;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @GetMapping("/checkout")
@@ -175,6 +178,17 @@ public class CheckoutController {
     @ResponseBody
     public Map<String, Object> completeRecovery(@RequestParam("orderNumber") String orderNumber) {
         return revWinAgentService.handlePaymentSuccessWebhook(orderNumber);
+    }
+
+    @GetMapping("/checkout/recovery/{orderNumber}")
+    public String showRecoveryPage(@PathVariable("orderNumber") String orderNumber, Model model) {
+        Optional<Order> orderOpt = orderRepository.findByOrderNumber(orderNumber);
+        if (orderOpt.isPresent()) {
+            model.addAttribute("order", orderOpt.get());
+        }
+        riskRecordRepository.findFirstByOrderNumberOrderByCreatedAtDesc(orderNumber)
+                .ifPresent(record -> model.addAttribute("riskRecord", record));
+        return "recovery";
     }
 
     @GetMapping("/checkout/success/{orderNumber}")

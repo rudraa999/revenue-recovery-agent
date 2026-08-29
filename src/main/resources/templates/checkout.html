@@ -123,25 +123,6 @@
                         </button>
                     </div>
 
-                    <!-- Live Finance Agent Recovery Banner -->
-                    <div id="aiRecoveryBanner" class="hidden p-5 rounded-2xl bg-slate-900 text-white border border-indigo-500/40 space-y-3 shadow-xl">
-                        <div class="flex items-center justify-between">
-                            <span class="bg-indigo-600 text-white text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full">Finance Agent Recovery</span>
-                            <span class="text-xs text-amber-400 font-mono">GATEWAY_TIMEOUT</span>
-                        </div>
-
-                        <div class="text-xs space-y-1.5 font-mono">
-                            <p class="text-slate-300"><strong class="text-indigo-400">Diagnosis:</strong> Bank Issuer Server Timeout (Outage)</p>
-                            <p class="text-slate-300"><strong class="text-indigo-400">Action:</strong> Generated Razorpay Smart Recovery Link (Backup Route)</p>
-                        </div>
-
-                        <div class="p-3 bg-slate-950 rounded-xl text-xs text-slate-300 border border-slate-800 font-mono" id="aiMessageText"></div>
-
-                        <button type="button" id="completeRecoveryBtn" onclick="completeRecoveryPayment()" class="w-full flex items-center justify-center gap-2 py-3 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg transition-all text-sm cursor-pointer">
-                            <span>Complete Payment via Backup Recovery Link</span>
-                        </button>
-                    </div>
-
                     <div id="statusMessage" class="hidden p-3 rounded-xl text-center text-sm font-medium"></div>
                 </div>
             </div>
@@ -171,7 +152,7 @@
 
             const statusDiv = document.getElementById('statusMessage');
             statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-blue-100 text-blue-700 block";
-            statusDiv.innerText = "Creating Razorpay order...";
+            statusDiv.innerText = "Opening secure Razorpay payment gateway...";
 
             // STEP 1: Initiate Order in store database
             fetch('/checkout/initiate', {
@@ -189,28 +170,24 @@
 
                 currentOrderNumber = storeOrder.orderNumber;
                 const totalAmount = storeOrder.amount;
+                const amountInPaise = Math.round(totalAmount * 100);
 
-                // STEP 2: Call Backend POST /api/create-order (Razorpay API)
+                // STEP 2: Try creating server order or fallback to direct test checkout
                 fetch('/api/create-order?amount=' + totalAmount + '&receipt=' + storeOrder.orderNumber, {
                     method: 'POST'
                 })
                 .then(res => res.json())
                 .then(rzpOrder => {
-                    if (rzpOrder.error) {
-                        statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-amber-100 text-amber-800 block";
-                        statusDiv.innerText = "Payment interrupted (" + rzpOrder.error + "). Triggering Finance Agent...";
-                        triggerFailureAgent(details, "GATEWAY_TIMEOUT");
-                        return;
-                    }
+                    const keyId = (rzpOrder && rzpOrder.key_id && !rzpOrder.error) ? rzpOrder.key_id : "rzp_test_TVGefE9Hju6tLV";
+                    const orderId = (rzpOrder && rzpOrder.order_id && !rzpOrder.error) ? rzpOrder.order_id : null;
 
                     // STEP 3: Open Razorpay Standard Checkout Modal
                     const options = {
-                        key: rzpOrder.key_id,
-                        amount: rzpOrder.amount,
-                        currency: rzpOrder.currency,
+                        key: keyId,
+                        amount: amountInPaise,
+                        currency: "INR",
                         name: "The Arts Arcade",
                         description: "Order #" + storeOrder.orderNumber,
-                        order_id: rzpOrder.order_id,
                         prefill: {
                             name: details.name,
                             email: details.email,
@@ -223,9 +200,9 @@
                             statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-blue-100 text-blue-700 block";
                             statusDiv.innerText = "Verifying HMAC-SHA256 payment signature...";
 
-                            fetch('/api/verify-payment?razorpay_order_id=' + encodeURIComponent(response.razorpay_order_id) +
-                                  '&razorpay_payment_id=' + encodeURIComponent(response.razorpay_payment_id) +
-                                  '&razorpay_signature=' + encodeURIComponent(response.razorpay_signature) +
+                            fetch('/api/verify-payment?razorpay_order_id=' + encodeURIComponent(response.razorpay_order_id || '') +
+                                  '&razorpay_payment_id=' + encodeURIComponent(response.razorpay_payment_id || '') +
+                                  '&razorpay_signature=' + encodeURIComponent(response.razorpay_signature || '') +
                                   '&orderNumber=' + encodeURIComponent(storeOrder.orderNumber), {
                                 method: 'POST'
                             })
@@ -242,36 +219,45 @@
                         modal: {
                             ondismiss: function () {
                                 statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-amber-100 text-amber-800 block";
-                                statusDiv.innerText = "Checkout modal dismissed. Triggering Finance Agent...";
-                                triggerFailureAgent(details, "CHECKOUT_DISMISSED");
+                                statusDiv.innerText = "Checkout dismissed. Redirecting to Finance Agent recovery...";
+                                triggerFailureAgent(details, "CHECKOUT_DISMISSED", storeOrder.orderNumber);
                             }
                         }
                     };
 
+                    if (orderId) {
+                        options.order_id = orderId;
+                    }
+
                     try {
                         const rzpModal = new Razorpay(options);
                         rzpModal.on('payment.failed', function (response) {
+                            const errCode = (response && response.error && response.error.code) ? response.error.code : "GATEWAY_TIMEOUT";
                             statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-red-100 text-red-700 block";
-                            statusDiv.innerText = "Payment failed. Triggering Finance Agent...";
-                            triggerFailureAgent(details, response.error ? response.error.code : "GATEWAY_TIMEOUT");
+                            statusDiv.innerText = "Payment interrupted at bank gateway. Redirecting to recovery page...";
+                            triggerFailureAgent(details, errCode, storeOrder.orderNumber);
                         });
 
                         rzpModal.open();
                     } catch (ex) {
-                        statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-amber-100 text-amber-800 block";
-                        statusDiv.innerText = "Payment Gateway Interrupted. Triggering Finance Agent...";
-                        triggerFailureAgent(details, "GATEWAY_TIMEOUT");
+                        console.error("Razorpay Modal launch exception:", ex);
+                        triggerFailureAgent(details, "GATEWAY_TIMEOUT", storeOrder.orderNumber);
                     }
                 })
                 .catch(err => {
-                    statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-amber-100 text-amber-800 block";
-                    statusDiv.innerText = "Connecting fallback... Triggering Finance Agent...";
-                    triggerFailureAgent(details, "GATEWAY_TIMEOUT");
+                    console.error("Error creating order:", err);
+                    triggerFailureAgent(details, "GATEWAY_TIMEOUT", storeOrder.orderNumber);
                 });
             });
         }
 
-        function triggerFailureAgent(details, failureCode) {
+        function triggerFailureAgent(details, failureCode, existingOrderNumber) {
+            const statusDiv = document.getElementById('statusMessage');
+            if (statusDiv) {
+                statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-amber-100 text-amber-800 block";
+                statusDiv.innerText = "Payment interrupted. Finance Agent activating recovery...";
+            }
+
             fetch('/checkout/fail-and-recover', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -279,10 +265,16 @@
             })
             .then(res => res.json())
             .then(data => {
-                if (data.success) {
-                    currentOrderNumber = data.orderNumber;
-                    document.getElementById('aiRecoveryBanner').classList.remove('hidden');
-                    document.getElementById('aiMessageText').innerText = data.message;
+                if (data.success && data.orderNumber) {
+                    // Redirect directly to the dedicated recovery page!
+                    window.location.href = '/checkout/recovery/' + data.orderNumber;
+                } else if (existingOrderNumber) {
+                    window.location.href = '/checkout/recovery/' + existingOrderNumber;
+                }
+            })
+            .catch(err => {
+                if (existingOrderNumber) {
+                    window.location.href = '/checkout/recovery/' + existingOrderNumber;
                 }
             });
         }
@@ -293,7 +285,7 @@
 
             const statusDiv = document.getElementById('statusMessage');
             statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-amber-100 text-amber-800 block";
-            statusDiv.innerText = "Simulating bank gateway timeout...";
+            statusDiv.innerText = "Simulating bank gateway timeout... Redirecting to Finance Agent Recovery...";
 
             triggerFailureAgent(details, "GATEWAY_TIMEOUT");
         }

@@ -79,17 +79,31 @@ public class RevWinAgentService {
         // 5. Ingest Event into Audit Ledger
         logAudit(orderNumber, "EVENT_INGESTED", "Ingested payment.failed webhook [Failure Code: " + failureCode + ", Amount: ₹" + amount + "]", "INFO");
 
-        // 6. SCENARIO 1: Root Cause Diagnoser Engine (BANK_GATEWAY_TIMEOUT)
+        // 6. Root Cause Diagnoser Engine
         String diagnosedCause;
         String interventionType;
-        String payloadMsg;
+        String actionDescription = "Generated Razorpay Smart Recovery Link (Backup Gateway Route)";
 
         if ("GATEWAY_TIMEOUT".equalsIgnoreCase(failureCode) || "BANK_SERVER_DOWN".equalsIgnoreCase(failureCode)) {
             diagnosedCause = "Bank Gateway Timeout / Network Issuer Outage";
             interventionType = "BACKUP_GATEWAY_LINK";
+            actionDescription = "Routed payment via alternative banking gateway";
+        } else if ("PAYMENT_AUTHENTICATION_FAILED".equalsIgnoreCase(failureCode) || "AUTHENTICATION_FAILED".equalsIgnoreCase(failureCode)) {
+            diagnosedCause = "3D-Secure Authentication / OTP Expired";
+            interventionType = "INSTANT_RETRY_LINK";
+            actionDescription = "Generated 1-click authentication retry session";
+        } else if ("CHECKOUT_DISMISSED".equalsIgnoreCase(failureCode)) {
+            diagnosedCause = "Customer Checkout Friction (Modal Dismissed)";
+            interventionType = "RESERVED_CART_LINK";
+            actionDescription = "Reserved cart items and dispatched express recovery link";
+        } else if ("INSUFFICIENT_FUNDS".equalsIgnoreCase(failureCode) || "CARD_LIMIT_EXCEEDED".equalsIgnoreCase(failureCode)) {
+            diagnosedCause = "Card Limit / Payment Method Declined";
+            interventionType = "MULTI_METHOD_LINK";
+            actionDescription = "Offered alternative payment routes (UPI / NetBanking)";
         } else {
             diagnosedCause = "Issuer Gateway Degradation (" + failureCode + ")";
             interventionType = "BACKUP_GATEWAY_LINK";
+            actionDescription = "Generated Razorpay Smart Recovery Route";
         }
 
         riskRecord.setFailureCode(failureCode);
@@ -98,14 +112,14 @@ public class RevWinAgentService {
         riskRecord.setStatus("RECOVERING");
         riskRecord.setAttemptCount(riskRecord.getAttemptCount() + 1);
 
-        logAudit(orderNumber, "DIAGNOSED_ROOT_CAUSE", "AI Diagnosis complete: Root Cause = " + diagnosedCause, "INFO");
+        logAudit(orderNumber, "DIAGNOSED_ROOT_CAUSE", "Diagnosis: " + diagnosedCause + " [Code: " + failureCode + "]", "INFO");
 
         // 7. Route Action: Generate Razorpay Smart Recovery Link with Backup Routing
         String recoveryUrl = razorpayService.createSmartRecoveryLink(orderNumber, amount, customerName, customerPhone, failureCode);
         riskRecord.setRecoveryLink(recoveryUrl);
         riskRecordRepository.save(riskRecord);
 
-        payloadMsg = "Hi " + customerName + "! Your artwork order #" + orderNumber + " (₹" + amount + ") was interrupted by a bank gateway timeout. Your items are reserved! Pay instantly via our backup Razorpay route: " + recoveryUrl;
+        String payloadMsg = "Hi " + customerName + "! Your artwork order #" + orderNumber + " (₹" + amount + ") was interrupted by a " + diagnosedCause + ". Your items are safely reserved! Complete your payment instantly via our backup route: " + recoveryUrl;
 
         // 8. Log Intervention
         RecoveryIntervention intervention = new RecoveryIntervention();
@@ -118,12 +132,14 @@ public class RevWinAgentService {
         intervention.setStatus("EXECUTED");
         interventionRepository.save(intervention);
 
-        logAudit(orderNumber, "INTERVENTION_DISPATCHED", "Routed Action: Dispatched Razorpay Backup Gateway Link -> " + recoveryUrl, "SUCCESS");
+        logAudit(orderNumber, "INTERVENTION_DISPATCHED", "Action: " + actionDescription + " -> " + recoveryUrl, "SUCCESS");
 
         result.put("status", "RECOVERING");
         result.put("orderNumber", orderNumber);
         result.put("amount", amount);
+        result.put("failureCode", failureCode);
         result.put("diagnosedCause", diagnosedCause);
+        result.put("actionDescription", actionDescription);
         result.put("recoveryUrl", recoveryUrl);
         result.put("message", payloadMsg);
 
