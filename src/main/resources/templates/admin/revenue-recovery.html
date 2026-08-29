@@ -32,48 +32,45 @@
 
         <!-- KPI Metrics Overview -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl relative overflow-hidden shadow-xl">
-                <div class="absolute top-0 left-0 w-1.5 h-full bg-amber-500"></div>
-                <p class="text-xs font-bold uppercase text-slate-400 tracking-wider">Revenue At Risk</p>
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-sm">
+                <p class="text-xs font-semibold uppercase text-slate-400 tracking-wider">Revenue At Risk</p>
                 <h3 class="text-3xl font-extrabold text-white mt-2">₹<span th:text="${totalAtRisk}">0.00</span></h3>
-                <p class="text-xs text-amber-400/80 mt-1">Detected failed payment attempts</p>
+                <p class="text-xs text-slate-400 mt-1">Total volume detected in interrupted checkouts</p>
             </div>
 
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl relative overflow-hidden shadow-xl">
-                <div class="absolute top-0 left-0 w-1.5 h-full bg-emerald-500"></div>
-                <p class="text-xs font-bold uppercase text-slate-400 tracking-wider">Measured Money Won Back</p>
-                <h3 class="text-3xl font-extrabold text-emerald-400 mt-2">₹<span th:text="${totalRecovered}">0.00</span></h3>
-                <p class="text-xs text-emerald-400/80 mt-1">Recovered via Razorpay Instant Payment Links</p>
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-sm">
+                <p class="text-xs font-semibold uppercase text-slate-400 tracking-wider">Recovered Revenue</p>
+                <h3 class="text-3xl font-extrabold text-white mt-2">₹<span th:text="${totalRecovered}">0.00</span></h3>
+                <p class="text-xs text-slate-400 mt-1">Won back via instant payment links</p>
             </div>
 
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl relative overflow-hidden shadow-xl">
-                <div class="absolute top-0 left-0 w-1.5 h-full bg-rose-500"></div>
-                <p class="text-xs font-bold uppercase text-slate-400 tracking-wider">Recovery Success Rate</p>
-                <h3 class="text-3xl font-extrabold text-rose-400 mt-2"><span th:text="${recoveryRate}">0.0</span>%</h3>
-                <p class="text-xs text-rose-400/80 mt-1">Bounded workflow conversion</p>
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-sm">
+                <p class="text-xs font-semibold uppercase text-slate-400 tracking-wider">Recovery Rate</p>
+                <h3 class="text-3xl font-extrabold text-white mt-2"><span th:text="${recoveryRate}">0.0</span>%</h3>
+                <p class="text-xs text-slate-400 mt-1">Autonomous intervention conversion rate</p>
             </div>
         </div>
 
         <!-- Risk Records & Active Agent Interventions -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl overflow-hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-sm overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
                 <div>
                     <h3 class="text-base font-bold text-white">Finance Agent Interventions & Risk Pipeline</h3>
-                    <p class="text-xs text-slate-400">Live view of failed checkout attempts handled by the Finance Agent</p>
+                    <p class="text-xs text-slate-400">Live view of payment failures, automated diagnoses, and recovery actions</p>
                 </div>
-                <span class="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-full border border-slate-700 font-semibold" th:text="${(riskRecords != null ? riskRecords.size() : 0) + ' Records Active'}">0 Records</span>
+                <span class="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-full border border-slate-700 font-semibold" th:text="${(riskRecords != null ? riskRecords.size() : 0) + ' Records'}">0 Records</span>
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
+            <div class="w-full">
+                <table class="w-full text-left border-collapse table-fixed">
                     <thead>
                         <tr class="bg-slate-950 text-slate-400 text-xs uppercase tracking-wider font-semibold border-b border-slate-800">
-                            <th class="py-3.5 px-6">Order Number</th>
-                            <th class="py-3.5 px-6">Customer</th>
-                            <th class="py-3.5 px-6">Amount</th>
-                            <th class="py-3.5 px-6">Agent Diagnosis</th>
-                            <th class="py-3.5 px-6">Status</th>
-                            <th class="py-3.5 px-6">Recovery Action</th>
+                            <th class="py-3 px-4 w-[13%] whitespace-nowrap">Order</th>
+                            <th class="py-3 px-4 w-[13%] whitespace-nowrap">Customer</th>
+                            <th class="py-3 px-4 w-[9%] whitespace-nowrap">Amount</th>
+                            <th class="py-3 px-4 w-[23%] whitespace-nowrap">Root Cause</th>
+                            <th class="py-3 px-4 w-[26%] whitespace-nowrap">Agent Actions Taken</th>
+                            <th class="py-3 px-4 pr-10 w-[16%] text-right whitespace-nowrap">Status</th>
                         </tr>
                     </thead>
                     <tbody id="pipelineTableBody" class="divide-y divide-slate-800 text-sm">
@@ -86,34 +83,59 @@
                                 <p class="text-xs text-slate-500 mt-1">Failed payments and automatic interventions will appear here in real-time.</p>
                             </td>
                         </tr>
-                        <tr th:each="record : ${riskRecords}" class="pipeline-row hover:bg-slate-800/50 transition">
-                            <td class="py-4 px-6 font-mono font-bold text-white" th:text="${record.orderNumber}">ORD-1234</td>
-                            <td class="py-4 px-6">
-                                <p class="font-semibold text-slate-200" th:text="${record.customerName}">Shruti</p>
-                                <p class="text-xs text-slate-400" th:text="${record.customerPhone}">+91 9876543210</p>
+                        <tr th:each="record : ${riskRecords}" class="pipeline-row hover:bg-slate-800/40 transition">
+                            <td class="py-3.5 px-4 font-mono font-semibold text-white whitespace-nowrap align-middle" th:text="${record.orderNumber}">ORD-1234</td>
+                            <td class="py-3.5 px-4 align-middle">
+                                <p class="font-medium text-slate-200 truncate" th:text="${record.customerName}">Shruti</p>
+                                <p class="text-xs text-slate-400 truncate" th:text="${record.customerPhone}">+91 9876543210</p>
                             </td>
-                            <td class="py-4 px-6 font-bold text-rose-400">₹<span th:text="${record.amount}">0.00</span></td>
-                            <td class="py-4 px-6">
-                                <span class="bg-amber-500/10 text-amber-300 text-xs px-2.5 py-1 rounded-lg border border-amber-500/20 font-medium" th:text="${record.failureReason != null ? record.failureReason : 'Bank Gateway Timeout'}">Bank Gateway Timeout</span>
+                            <td class="py-3.5 px-4 font-bold text-white text-base whitespace-nowrap align-middle">₹<span th:text="${record.amount != null ? #numbers.formatDecimal(record.amount, 1, 2) : '0.00'}">0.00</span></td>
+                            <td class="py-3.5 px-4 align-middle">
+                                <p class="font-semibold text-slate-100 truncate" th:text="${record.failureReason != null and (#strings.contains(record.failureReason, 'Friction') or #strings.contains(record.failureReason, 'Dismissed')) ? 'Customer Checkout Abandonment' : (record.failureReason != null and #strings.contains(record.failureReason, 'Timeout') ? 'Bank Gateway Timeout' : (record.failureReason != null and #strings.contains(record.failureReason, 'Degradation') ? 'Bank Payment Processing Issue' : (record.failureReason != null ? record.failureReason : 'Customer Checkout Abandonment')))}">Customer Checkout Abandonment</p>
                             </td>
-                            <td class="py-4 px-6">
-                                <span th:if="${record.status == 'RECOVERED'}" class="bg-emerald-500/20 text-emerald-300 font-bold text-xs px-2.5 py-1 rounded-full border border-emerald-500/30">RECOVERED</span>
-                                <span th:if="${record.status == 'REMINDER_SENT'}" class="bg-purple-500/20 text-purple-300 font-bold text-xs px-2.5 py-1 rounded-full border border-purple-500/30 flex items-center gap-1">📲 REMINDER SENT</span>
-                                <span th:if="${record.status == 'RECOVERING'}" class="bg-blue-500/20 text-blue-300 font-bold text-xs px-2.5 py-1 rounded-full border border-blue-500/30 animate-pulse">RECOVERING</span>
-                                <span th:if="${record.status == 'AT_RISK'}" class="bg-amber-500/20 text-amber-300 font-bold text-xs px-2.5 py-1 rounded-full border border-amber-500/30">AT RISK</span>
-                                <span th:if="${record.status == 'ESCALATED'}" class="bg-rose-500/20 text-rose-300 font-bold text-xs px-2.5 py-1 rounded-full border border-rose-500/30">ESCALATED</span>
+                            <td class="py-3.5 px-4 align-middle">
+                                <!-- When Recovered -->
+                                <div th:if="${record.status == 'RECOVERED'}" class="space-y-0.5">
+                                    <p class="text-xs text-emerald-400 font-medium flex items-center gap-1.5 truncate">
+                                        <span>✓</span>
+                                        <span th:if="${record.failureReason != null and #strings.contains(record.failureReason, 'Timeout')}">Rerouted via backup gateway; recovered</span>
+                                        <span th:unless="${record.failureReason != null and #strings.contains(record.failureReason, 'Timeout')}">Dispatched instant link; recovered</span>
+                                    </p>
+                                    <p class="text-[11px] text-slate-500 truncate">Autonomous workflow completed</p>
+                                </div>
+
+                                <!-- When Reminder Sent -->
+                                <div th:if="${record.status == 'REMINDER_SENT'}" class="space-y-0.5">
+                                    <p class="text-xs text-indigo-300 font-medium truncate">Dispatched 2-min reminder link</p>
+                                    <p class="text-[11px] text-slate-400 truncate">Awaiting customer payment completion</p>
+                                </div>
+
+                                <!-- When In Progress (Recovering / At Risk) -->
+                                <div th:if="${record.status == 'RECOVERING' or record.status == 'AT_RISK'}" class="space-y-0.5">
+                                    <p class="text-xs text-slate-200 font-medium truncate">
+                                        <span th:if="${record.failureReason != null and #strings.contains(record.failureReason, 'Timeout')}">Diagnosed bank outage & routed backup</span>
+                                        <span th:unless="${record.failureReason != null and #strings.contains(record.failureReason, 'Timeout')}">Generated 1-click instant recovery link</span>
+                                    </p>
+                                    <p class="text-[11px] text-slate-400 truncate">Next: Automated 2-min reminder if unpaid</p>
+                                </div>
+
+                                <!-- When Escalated -->
+                                <div th:if="${record.status == 'ESCALATED'}" class="space-y-0.5">
+                                    <p class="text-xs text-rose-400 font-medium truncate">Max retries reached</p>
+                                    <p class="text-[11px] text-slate-400 truncate">Escalated to human support</p>
+                                </div>
                             </td>
-                            <td class="py-4 px-6">
-                                <div class="flex items-center gap-2">
-                                    <a th:if="${record.recoveryLink != null}" th:href="${record.recoveryLink}" target="_blank" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-3 py-1.5 rounded-lg transition underline flex items-center gap-1">
-                                        <span>Razorpay Link</span>
-                                    </a>
-                                    <button th:if="${record.status != 'RECOVERED'}" type="button" th:attr="data-order=${record.orderNumber}" onclick="sendManualReminder(this.getAttribute('data-order'))" class="text-xs bg-purple-600 hover:bg-purple-700 text-white font-medium px-2.5 py-1.5 rounded-lg transition shadow cursor-pointer">
-                                        📲 Send Reminder
+                            <td class="py-3.5 px-4 pr-10 text-right whitespace-nowrap align-middle">
+                                <div class="inline-flex items-center justify-end gap-2">
+                                    <span th:if="${record.status == 'RECOVERED'}" class="bg-emerald-500/10 text-emerald-400 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-emerald-500/20">Recovered</span>
+                                    <span th:if="${record.status == 'REMINDER_SENT'}" class="bg-indigo-500/10 text-indigo-400 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-indigo-500/20">Reminder Sent</span>
+                                    <span th:if="${record.status == 'RECOVERING'}" class="bg-blue-500/10 text-blue-400 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-blue-500/20">Recovering</span>
+                                    <span th:if="${record.status == 'AT_RISK'}" class="bg-slate-700/50 text-slate-300 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-slate-600/50">At Risk</span>
+                                    <span th:if="${record.status == 'ESCALATED'}" class="bg-rose-500/10 text-rose-400 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-rose-500/20">Escalated</span>
+
+                                    <button th:if="${record.status != 'RECOVERED'}" type="button" th:attr="data-order=${record.orderNumber}" onclick="simulateSuccess(this.getAttribute('data-order'))" title="Simulate payment success for demo" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-emerald-400 px-2 py-0.5 rounded border border-slate-700 transition cursor-pointer">
+                                        Simulate
                                     </button>
-                                    <button th:if="${record.status != 'RECOVERED'}" type="button" th:attr="data-order=${record.orderNumber}" onclick="simulateSuccess(this.getAttribute('data-order'))" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-3 py-1.5 rounded-lg transition shadow cursor-pointer">
-                                         Simulate Payment Success
-                                     </button>
                                 </div>
                             </td>
                         </tr>
@@ -249,27 +271,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             renderPagination();
         });
-
-        function sendManualReminder(orderNumber) {
-            fetch('/admin/revenue-recovery/send-reminder', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'orderNumber=' + encodeURIComponent(orderNumber)
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    alert("Omnichannel payment reminder dispatched successfully!\n\nPayload: " + data.message);
-                    window.location.reload();
-                } else {
-                    alert(data.message || "Failed to dispatch reminder.");
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                alert("Error sending reminder.");
-            });
-        }
 
         function simulateSuccess(orderNumber) {
             fetch('/api/recovery/simulate-payment-success?orderNumber=' + encodeURIComponent(orderNumber), {

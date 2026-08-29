@@ -87,23 +87,23 @@ public class RevWinAgentService {
         String actionDescription = "Generated Razorpay Instant Payment Link (Backup Gateway Route)";
 
         if ("GATEWAY_TIMEOUT".equalsIgnoreCase(failureCode) || "BANK_SERVER_DOWN".equalsIgnoreCase(failureCode)) {
-            diagnosedCause = "Bank Gateway Timeout / Network Issuer Outage";
+            diagnosedCause = "Bank Gateway Timeout";
             interventionType = "BACKUP_GATEWAY_LINK";
             actionDescription = "Routed payment via alternative banking gateway";
         } else if ("PAYMENT_AUTHENTICATION_FAILED".equalsIgnoreCase(failureCode) || "AUTHENTICATION_FAILED".equalsIgnoreCase(failureCode)) {
-            diagnosedCause = "3D-Secure Authentication / OTP Expired";
+            diagnosedCause = "OTP Verification Timeout";
             interventionType = "INSTANT_RETRY_LINK";
             actionDescription = "Generated 1-click authentication retry session";
         } else if ("CHECKOUT_DISMISSED".equalsIgnoreCase(failureCode)) {
-            diagnosedCause = "Customer Checkout Friction (Modal Dismissed)";
+            diagnosedCause = "Customer Checkout Abandonment";
             interventionType = "RESERVED_CART_LINK";
-            actionDescription = "Reserved cart items and dispatched instant payment link";
+            actionDescription = "Generated instant payment link for customer checkout";
         } else if ("INSUFFICIENT_FUNDS".equalsIgnoreCase(failureCode) || "CARD_LIMIT_EXCEEDED".equalsIgnoreCase(failureCode)) {
-            diagnosedCause = "Card Limit / Payment Method Declined";
+            diagnosedCause = "Card Limit Reached / Declined by Bank";
             interventionType = "MULTI_METHOD_LINK";
             actionDescription = "Offered alternative payment routes (UPI / NetBanking)";
         } else {
-            diagnosedCause = "Issuer Gateway Degradation (" + failureCode + ")";
+            diagnosedCause = "Bank Payment Processing Issue";
             interventionType = "BACKUP_GATEWAY_LINK";
             actionDescription = "Generated Razorpay Instant Payment Link";
         }
@@ -217,7 +217,7 @@ public class RevWinAgentService {
         }
 
         // Formulate 2-minute follow-up reminder payload
-        String reminderMsg = "Hi " + customerName + "! We noticed your order #" + orderNumber + " (₹" + amount + ") is still waiting. Your cart items are reserved! Complete your payment via your instant payment link: " + recoveryUrl;
+        String reminderMsg = "Hi " + customerName + "! We noticed your order #" + orderNumber + " (₹" + amount + ") was not completed. Complete your payment securely via your instant payment link: " + recoveryUrl;
 
         // Log Intervention
         RecoveryIntervention intervention = new RecoveryIntervention();
