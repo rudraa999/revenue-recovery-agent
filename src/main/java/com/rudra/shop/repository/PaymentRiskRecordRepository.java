@@ -10,6 +10,7 @@ import java.util.Optional;
 @Repository
 public interface PaymentRiskRecordRepository extends JpaRepository<PaymentRiskRecord, Long> {
     Optional<PaymentRiskRecord> findByOrderNumber(String orderNumber);
+    Optional<PaymentRiskRecord> findFirstByOrderNumberOrderByCreatedAtDesc(String orderNumber);
     List<PaymentRiskRecord> findByStatusOrderByCreatedAtDesc(String status);
     List<PaymentRiskRecord> findAllByOrderByCreatedAtDesc();
 }

@@ -118,27 +118,27 @@
                             <span>Pay ₹<span th:text="${#numbers.formatDecimal(grandTotal, 1, 2)}">0.00</span> via Razorpay</span>
                         </button>
 
-                        <button type="button" onclick="simulateGatewayTimeoutFailure()" class="w-full flex items-center justify-center gap-2 py-3.5 px-6 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl shadow-md transition-all text-xs cursor-pointer">
-                            <span>⚠️ Simulate Bank Gateway Timeout (Trigger RevWin AI)</span>
+                        <button type="button" onclick="simulateGatewayTimeoutFailure()" class="w-full flex items-center justify-center gap-2 py-3.5 px-6 bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium rounded-xl shadow-md transition-all text-xs cursor-pointer">
+                            <span>⚠️ Simulate Bank Gateway Timeout (Trigger Finance Agent)</span>
                         </button>
                     </div>
 
-                    <!-- Live AI Agent Recovery Banner -->
-                    <div id="aiRecoveryBanner" class="hidden p-5 rounded-2xl bg-slate-900 text-white border border-rose-500/40 space-y-3 shadow-xl">
+                    <!-- Live Finance Agent Recovery Banner -->
+                    <div id="aiRecoveryBanner" class="hidden p-5 rounded-2xl bg-slate-900 text-white border border-indigo-500/40 space-y-3 shadow-xl">
                         <div class="flex items-center justify-between">
-                            <span class="bg-rose-500 text-white text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-1 rounded-full">RevWin AI Recovery Agent</span>
+                            <span class="bg-indigo-600 text-white text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full">Finance Agent Recovery</span>
                             <span class="text-xs text-amber-400 font-mono">GATEWAY_TIMEOUT</span>
                         </div>
 
                         <div class="text-xs space-y-1.5 font-mono">
-                            <p class="text-slate-300"><strong class="text-rose-400">Diagnosis:</strong> Bank Issuer Server Timeout (Outage)</p>
-                            <p class="text-slate-300"><strong class="text-indigo-400">Action:</strong> Generated Razorpay Smart Recovery Link (Backup Gateway Route)</p>
+                            <p class="text-slate-300"><strong class="text-indigo-400">Diagnosis:</strong> Bank Issuer Server Timeout (Outage)</p>
+                            <p class="text-slate-300"><strong class="text-indigo-400">Action:</strong> Generated Razorpay Smart Recovery Link (Backup Route)</p>
                         </div>
 
                         <div class="p-3 bg-slate-950 rounded-xl text-xs text-slate-300 border border-slate-800 font-mono" id="aiMessageText"></div>
 
-                        <button type="button" id="completeRecoveryBtn" onclick="completeRecoveryPayment()" class="w-full flex items-center justify-center gap-2 py-3 px-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold rounded-xl shadow-lg transition-all text-sm cursor-pointer">
-                            <span>Complete Payment via Backup Gateway Link</span>
+                        <button type="button" id="completeRecoveryBtn" onclick="completeRecoveryPayment()" class="w-full flex items-center justify-center gap-2 py-3 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg transition-all text-sm cursor-pointer">
+                            <span>Complete Payment via Backup Recovery Link</span>
                         </button>
                     </div>
 
@@ -198,7 +198,7 @@
                 .then(rzpOrder => {
                     if (rzpOrder.error) {
                         statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-amber-100 text-amber-800 block";
-                        statusDiv.innerText = "Payment interrupted (" + rzpOrder.error + "). Triggering RevWin AI Recovery Agent...";
+                        statusDiv.innerText = "Payment interrupted (" + rzpOrder.error + "). Triggering Finance Agent...";
                         triggerFailureAgent(details, "GATEWAY_TIMEOUT");
                         return;
                     }
@@ -242,7 +242,7 @@
                         modal: {
                             ondismiss: function () {
                                 statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-amber-100 text-amber-800 block";
-                                statusDiv.innerText = "Checkout modal dismissed. Triggering RevWin AI Recovery Agent...";
+                                statusDiv.innerText = "Checkout modal dismissed. Triggering Finance Agent...";
                                 triggerFailureAgent(details, "CHECKOUT_DISMISSED");
                             }
                         }
@@ -252,20 +252,20 @@
                         const rzpModal = new Razorpay(options);
                         rzpModal.on('payment.failed', function (response) {
                             statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-red-100 text-red-700 block";
-                            statusDiv.innerText = "Payment failed. Triggering RevWin AI Recovery Agent...";
+                            statusDiv.innerText = "Payment failed. Triggering Finance Agent...";
                             triggerFailureAgent(details, response.error ? response.error.code : "GATEWAY_TIMEOUT");
                         });
 
                         rzpModal.open();
                     } catch (ex) {
                         statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-amber-100 text-amber-800 block";
-                        statusDiv.innerText = "Payment Gateway Interrupted. Triggering RevWin AI Agent...";
+                        statusDiv.innerText = "Payment Gateway Interrupted. Triggering Finance Agent...";
                         triggerFailureAgent(details, "GATEWAY_TIMEOUT");
                     }
                 })
                 .catch(err => {
                     statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-amber-100 text-amber-800 block";
-                    statusDiv.innerText = "Connecting fallback... Triggering RevWin AI Recovery Agent...";
+                    statusDiv.innerText = "Connecting fallback... Triggering Finance Agent...";
                     triggerFailureAgent(details, "GATEWAY_TIMEOUT");
                 });
             });

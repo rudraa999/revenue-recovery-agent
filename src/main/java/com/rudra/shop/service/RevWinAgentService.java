@@ -47,7 +47,7 @@ public class RevWinAgentService {
         }
 
         // 2. Retrieve or Create PaymentRiskRecord
-        PaymentRiskRecord riskRecord = riskRecordRepository.findByOrderNumber(orderNumber)
+        PaymentRiskRecord riskRecord = riskRecordRepository.findFirstByOrderNumberOrderByCreatedAtDesc(orderNumber)
                 .orElseGet(() -> {
                     PaymentRiskRecord record = new PaymentRiskRecord();
                     record.setOrderNumber(orderNumber);
@@ -134,7 +134,7 @@ public class RevWinAgentService {
     public Map<String, Object> handlePaymentSuccessWebhook(String orderNumber) {
         Map<String, Object> result = new HashMap<>();
 
-        Optional<PaymentRiskRecord> recordOpt = riskRecordRepository.findByOrderNumber(orderNumber);
+        Optional<PaymentRiskRecord> recordOpt = riskRecordRepository.findFirstByOrderNumberOrderByCreatedAtDesc(orderNumber);
         if (recordOpt.isPresent()) {
             PaymentRiskRecord record = recordOpt.get();
             record.setStatus("RECOVERED");

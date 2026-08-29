@@ -41,8 +41,8 @@
 <body>
 
     <div class="error-container">
-        <div class="error-code" th:text="${errorCode}">Oops!</div>
-        <div class="error-message" th:text="${errorMessage}">Something went wrong.</div>
+        <div class="error-code" th:text="${errorCode != null ? errorCode : (status != null ? status : 'Oops!')}">Oops!</div>
+        <div class="error-message" th:text="${errorMessage != null ? errorMessage : (message != null ? message : 'Something went wrong.')}">Something went wrong.</div>
         <a href="/" class="btn btn-primary btn-lg">Go to Home</a>
     </div>
 
