@@ -77,6 +77,9 @@ public class AdminController {
         model.addAttribute("riskRecords", riskRecords != null ? riskRecords : new ArrayList<>());
         model.addAttribute("interventions", interventions != null ? interventions : new ArrayList<>());
         model.addAttribute("auditLogs", auditLogs != null ? auditLogs : new ArrayList<>());
+        model.addAttribute("totalCount", riskRecords != null ? riskRecords.size() : 0);
+        model.addAttribute("recoveredCount", recoveredCount);
+        model.addAttribute("pendingCount", (riskRecords != null ? riskRecords.size() : 0) - recoveredCount);
         model.addAttribute("totalAtRisk", String.format(java.util.Locale.US, "%.2f", totalAtRisk));
         model.addAttribute("totalRecovered", String.format(java.util.Locale.US, "%.2f", totalRecovered));
         model.addAttribute("recoveryRate", String.format(java.util.Locale.US, "%.1f", recoveryRate));

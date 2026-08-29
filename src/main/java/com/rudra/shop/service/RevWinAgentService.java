@@ -181,14 +181,14 @@ public class RevWinAgentService {
     }
 
     /**
-     * Automated Background Engine: Checks every 15 seconds for unrecovered orders older than 2 minutes
+     * Automated Background Engine: Checks every 15 seconds for unrecovered orders older than 5 minutes
      * and automatically dispatches omnichannel SMS/WhatsApp reminders.
      */
     @Scheduled(fixedRate = 15000)
     @Transactional
     public void runAutomatedReminderJob() {
         List<PaymentRiskRecord> pendingRecords = riskRecordRepository.findByStatusIn(Arrays.asList("RECOVERING", "AT_RISK"));
-        LocalDateTime threshold = LocalDateTime.now().minusMinutes(2);
+        LocalDateTime threshold = LocalDateTime.now().minusMinutes(5);
 
         for (PaymentRiskRecord record : pendingRecords) {
             if (record.getCreatedAt() != null && record.getCreatedAt().isBefore(threshold)) {
@@ -216,13 +216,13 @@ public class RevWinAgentService {
             return response;
         }
 
-        // Formulate 2-minute follow-up reminder payload
+        // Formulate 5-minute follow-up reminder payload
         String reminderMsg = "Hi " + customerName + "! We noticed your order #" + orderNumber + " (₹" + amount + ") was not completed. Complete your payment securely via your instant payment link: " + recoveryUrl;
 
         // Log Intervention
         RecoveryIntervention intervention = new RecoveryIntervention();
         intervention.setRiskRecord(record);
-        intervention.setInterventionType("2_MIN_AUTOMATED_REMINDER");
+        intervention.setInterventionType("5_MIN_AUTOMATED_REMINDER");
         intervention.setChannel("SMS_AND_WHATSAPP");
         intervention.setPayloadMessage(reminderMsg);
         intervention.setRecoveryUrl(recoveryUrl);
@@ -236,7 +236,7 @@ public class RevWinAgentService {
         riskRecordRepository.save(record);
 
         // Log to Audit Ledger
-        logAudit(orderNumber, "REMINDER_DISPATCHED", "Automated 2-Min Follow-Up: Dispatched SMS & WhatsApp instant payment link to " + customerPhone + " for Order #" + orderNumber, "INFO");
+        logAudit(orderNumber, "REMINDER_DISPATCHED", "Automated 5-Min Follow-Up: Dispatched SMS & WhatsApp instant payment link to " + customerPhone + " for Order #" + orderNumber, "INFO");
 
         response.put("success", true);
         response.put("orderNumber", orderNumber);

@@ -32,23 +32,68 @@
 
         <!-- KPI Metrics Overview -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-sm">
-                <p class="text-xs font-semibold uppercase text-slate-400 tracking-wider">Revenue At Risk</p>
-                <h3 class="text-3xl font-extrabold text-white mt-2">₹<span th:text="${totalAtRisk}">0.00</span></h3>
-                <p class="text-xs text-slate-400 mt-1">Total volume detected in interrupted checkouts</p>
+            
+            <!-- Card 1: Revenue At Risk -->
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-sm space-y-4 hover:border-slate-700 transition">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">Revenue At Risk</span>
+                    <span class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                        <span>Live Pipeline</span>
+                    </span>
+                </div>
+                <div>
+                    <h3 class="text-3xl font-extrabold text-white tracking-tight">₹<span th:text="${totalAtRisk}">0.00</span></h3>
+                    <p class="text-xs text-slate-400 mt-1">Total volume detected in interrupted checkouts</p>
+                </div>
+                <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+                    <span>Active Cases: <strong class="text-slate-200" th:text="${pendingCount != null ? pendingCount : (riskRecords != null ? (riskRecords.size() - #lists.size(riskRecords.?[status == 'RECOVERED'])) : 0)}">0</strong></span>
+                    <span>Total Ingested: <strong class="text-slate-200" th:text="${totalCount != null ? totalCount : (riskRecords != null ? riskRecords.size() : 0)}">0</strong></span>
+                </div>
             </div>
 
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-sm">
-                <p class="text-xs font-semibold uppercase text-slate-400 tracking-wider">Recovered Revenue</p>
-                <h3 class="text-3xl font-extrabold text-white mt-2">₹<span th:text="${totalRecovered}">0.00</span></h3>
-                <p class="text-xs text-slate-400 mt-1">Won back via instant payment links</p>
+            <!-- Card 2: Recovered Revenue -->
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-sm space-y-4 hover:border-slate-700 transition">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">Recovered Revenue</span>
+                    <span class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                        <span>✓ Won Back</span>
+                    </span>
+                </div>
+                <div>
+                    <h3 class="text-3xl font-extrabold text-white tracking-tight">₹<span th:text="${totalRecovered}">0.00</span></h3>
+                    <p class="text-xs text-slate-400 mt-1">Saved via instant links & automated fallbacks</p>
+                </div>
+                <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+                    <span>Autonomous Orders Won:</span>
+                    <span class="font-bold text-emerald-400" th:text="${(recoveredCount != null ? recoveredCount : (riskRecords != null ? #lists.size(riskRecords.?[status == 'RECOVERED']) : 0)) + ' Orders'}">0 Orders</span>
+                </div>
             </div>
 
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-sm">
-                <p class="text-xs font-semibold uppercase text-slate-400 tracking-wider">Recovery Rate</p>
-                <h3 class="text-3xl font-extrabold text-white mt-2"><span th:text="${recoveryRate}">0.0</span>%</h3>
-                <p class="text-xs text-slate-400 mt-1">Autonomous intervention conversion rate</p>
+            <!-- Card 3: Recovery Rate -->
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-sm space-y-4 hover:border-slate-700 transition">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">Autonomous Recovery Rate</span>
+                    <span class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-indigo-400 bg-indigo-500/10 px-2.5 py-0.5 rounded-full border border-indigo-500/20">
+                        <span>Agent Efficiency</span>
+                    </span>
+                </div>
+                <div>
+                    <div class="flex items-baseline justify-between">
+                        <h3 class="text-3xl font-extrabold text-white tracking-tight"><span th:text="${recoveryRate}">0.0</span>%</h3>
+                        <span class="text-xs text-slate-400" th:text="${(recoveredCount != null ? recoveredCount : (riskRecords != null ? #lists.size(riskRecords.?[status == 'RECOVERED']) : 0)) + ' of ' + (totalCount != null ? totalCount : (riskRecords != null ? riskRecords.size() : 0)) + ' Converted'}">0 of 0 Converted</span>
+                    </div>
+                    <!-- Mini Sleek Progress Bar -->
+                    <div class="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
+                        <div class="bg-indigo-500 h-full rounded-full transition-all duration-500" th:style="'width: ' + ${recoveryRate} + '%'"></div>
+                    </div>
+                </div>
+                <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+                    <span>Intervention Model:</span>
+                    <span class="text-slate-200 font-medium">Auto-Recovery Engine</span>
+                </div>
             </div>
+
         </div>
 
         <!-- Risk Records & Active Agent Interventions -->
@@ -106,7 +151,7 @@
 
                                 <!-- When Reminder Sent -->
                                 <div th:if="${record.status == 'REMINDER_SENT'}" class="space-y-0.5">
-                                    <p class="text-xs text-indigo-300 font-medium truncate">Dispatched 2-min reminder link</p>
+                                    <p class="text-xs text-indigo-300 font-medium truncate">Dispatched reminder link</p>
                                     <p class="text-[11px] text-slate-400 truncate">Awaiting customer payment completion</p>
                                 </div>
 
@@ -116,7 +161,7 @@
                                         <span th:if="${record.failureReason != null and #strings.contains(record.failureReason, 'Timeout')}">Diagnosed bank outage & routed backup</span>
                                         <span th:unless="${record.failureReason != null and #strings.contains(record.failureReason, 'Timeout')}">Generated 1-click instant recovery link</span>
                                     </p>
-                                    <p class="text-[11px] text-slate-400 truncate">Next: Automated 2-min reminder if unpaid</p>
+                                    <p class="text-[11px] text-slate-400 truncate">Next: Automated reminder if unpaid</p>
                                 </div>
 
                                 <!-- When Escalated -->
