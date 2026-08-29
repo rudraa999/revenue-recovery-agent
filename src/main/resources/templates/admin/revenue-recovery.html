@@ -43,7 +43,7 @@
                 <div class="absolute top-0 left-0 w-1.5 h-full bg-emerald-500"></div>
                 <p class="text-xs font-bold uppercase text-slate-400 tracking-wider">Measured Money Won Back</p>
                 <h3 class="text-3xl font-extrabold text-emerald-400 mt-2">₹<span th:text="${totalRecovered}">0.00</span></h3>
-                <p class="text-xs text-emerald-400/80 mt-1">Recovered via Razorpay Smart Links</p>
+                <p class="text-xs text-emerald-400/80 mt-1">Recovered via Razorpay Instant Payment Links</p>
             </div>
 
             <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl relative overflow-hidden shadow-xl">
@@ -98,6 +98,7 @@
                             </td>
                             <td class="py-4 px-6">
                                 <span th:if="${record.status == 'RECOVERED'}" class="bg-emerald-500/20 text-emerald-300 font-bold text-xs px-2.5 py-1 rounded-full border border-emerald-500/30">RECOVERED</span>
+                                <span th:if="${record.status == 'REMINDER_SENT'}" class="bg-purple-500/20 text-purple-300 font-bold text-xs px-2.5 py-1 rounded-full border border-purple-500/30 flex items-center gap-1">📲 REMINDER SENT</span>
                                 <span th:if="${record.status == 'RECOVERING'}" class="bg-blue-500/20 text-blue-300 font-bold text-xs px-2.5 py-1 rounded-full border border-blue-500/30 animate-pulse">RECOVERING</span>
                                 <span th:if="${record.status == 'AT_RISK'}" class="bg-amber-500/20 text-amber-300 font-bold text-xs px-2.5 py-1 rounded-full border border-amber-500/30">AT RISK</span>
                                 <span th:if="${record.status == 'ESCALATED'}" class="bg-rose-500/20 text-rose-300 font-bold text-xs px-2.5 py-1 rounded-full border border-rose-500/30">ESCALATED</span>
@@ -107,6 +108,9 @@
                                     <a th:if="${record.recoveryLink != null}" th:href="${record.recoveryLink}" target="_blank" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-3 py-1.5 rounded-lg transition underline flex items-center gap-1">
                                         <span>Razorpay Link</span>
                                     </a>
+                                    <button th:if="${record.status != 'RECOVERED'}" type="button" th:attr="data-order=${record.orderNumber}" onclick="sendManualReminder(this.getAttribute('data-order'))" class="text-xs bg-purple-600 hover:bg-purple-700 text-white font-medium px-2.5 py-1.5 rounded-lg transition shadow cursor-pointer">
+                                        📲 Send Reminder
+                                    </button>
                                     <button th:if="${record.status != 'RECOVERED'}" type="button" th:attr="data-order=${record.orderNumber}" onclick="simulateSuccess(this.getAttribute('data-order'))" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-3 py-1.5 rounded-lg transition shadow cursor-pointer">
                                          Simulate Payment Success
                                      </button>
@@ -245,6 +249,27 @@
         document.addEventListener('DOMContentLoaded', () => {
             renderPagination();
         });
+
+        function sendManualReminder(orderNumber) {
+            fetch('/admin/revenue-recovery/send-reminder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'orderNumber=' + encodeURIComponent(orderNumber)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Omnichannel payment reminder dispatched successfully!\n\nPayload: " + data.message);
+                    window.location.reload();
+                } else {
+                    alert(data.message || "Failed to dispatch reminder.");
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Error sending reminder.");
+            });
+        }
 
         function simulateSuccess(orderNumber) {
             fetch('/api/recovery/simulate-payment-success?orderNumber=' + encodeURIComponent(orderNumber), {

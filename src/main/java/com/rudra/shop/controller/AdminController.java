@@ -80,4 +80,10 @@ public class AdminController {
 
         return "admin/revenue-recovery";
     }
+
+    @PostMapping("/admin/revenue-recovery/send-reminder")
+    @ResponseBody
+    public Map<String, Object> sendReminder(@RequestParam("orderNumber") String orderNumber) {
+        return revWinAgentService.triggerManualReminder(orderNumber);
+    }
 }

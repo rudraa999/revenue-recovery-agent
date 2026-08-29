@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.scheduling.annotation.Scheduled;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -82,7 +84,7 @@ public class RevWinAgentService {
         // 6. Root Cause Diagnoser Engine
         String diagnosedCause;
         String interventionType;
-        String actionDescription = "Generated Razorpay Smart Recovery Link (Backup Gateway Route)";
+        String actionDescription = "Generated Razorpay Instant Payment Link (Backup Gateway Route)";
 
         if ("GATEWAY_TIMEOUT".equalsIgnoreCase(failureCode) || "BANK_SERVER_DOWN".equalsIgnoreCase(failureCode)) {
             diagnosedCause = "Bank Gateway Timeout / Network Issuer Outage";
@@ -95,7 +97,7 @@ public class RevWinAgentService {
         } else if ("CHECKOUT_DISMISSED".equalsIgnoreCase(failureCode)) {
             diagnosedCause = "Customer Checkout Friction (Modal Dismissed)";
             interventionType = "RESERVED_CART_LINK";
-            actionDescription = "Reserved cart items and dispatched express recovery link";
+            actionDescription = "Reserved cart items and dispatched instant payment link";
         } else if ("INSUFFICIENT_FUNDS".equalsIgnoreCase(failureCode) || "CARD_LIMIT_EXCEEDED".equalsIgnoreCase(failureCode)) {
             diagnosedCause = "Card Limit / Payment Method Declined";
             interventionType = "MULTI_METHOD_LINK";
@@ -103,7 +105,7 @@ public class RevWinAgentService {
         } else {
             diagnosedCause = "Issuer Gateway Degradation (" + failureCode + ")";
             interventionType = "BACKUP_GATEWAY_LINK";
-            actionDescription = "Generated Razorpay Smart Recovery Route";
+            actionDescription = "Generated Razorpay Instant Payment Link";
         }
 
         riskRecord.setFailureCode(failureCode);
@@ -114,18 +116,18 @@ public class RevWinAgentService {
 
         logAudit(orderNumber, "DIAGNOSED_ROOT_CAUSE", "Diagnosis: " + diagnosedCause + " [Code: " + failureCode + "]", "INFO");
 
-        // 7. Route Action: Generate Razorpay Smart Recovery Link with Backup Routing
+        // 7. Route Action: Generate Razorpay Instant Payment Link with Backup Routing
         String recoveryUrl = razorpayService.createSmartRecoveryLink(orderNumber, amount, customerName, customerPhone, failureCode);
         riskRecord.setRecoveryLink(recoveryUrl);
         riskRecordRepository.save(riskRecord);
 
-        String payloadMsg = "Hi " + customerName + "! Your artwork order #" + orderNumber + " (₹" + amount + ") was interrupted by a " + diagnosedCause + ". Your items are safely reserved! Complete your payment instantly via our backup route: " + recoveryUrl;
+        String payloadMsg = "Hi " + customerName + "! Your artwork order #" + orderNumber + " (₹" + amount + ") was interrupted by a " + diagnosedCause + ". Your items are safely reserved! Complete your payment via your instant payment link: " + recoveryUrl;
 
         // 8. Log Intervention
         RecoveryIntervention intervention = new RecoveryIntervention();
         intervention.setRiskRecord(riskRecord);
         intervention.setInterventionType(interventionType);
-        intervention.setChannel("RAZORPAY_SMART_LINK");
+        intervention.setChannel("RAZORPAY_INSTANT_LINK");
         intervention.setPayloadMessage(payloadMsg);
         intervention.setRecoveryUrl(recoveryUrl);
         intervention.setAttemptNumber(riskRecord.getAttemptCount());
@@ -163,7 +165,7 @@ public class RevWinAgentService {
                 orderRepository.save(order);
             }
 
-            logAudit(orderNumber, "REVENUE_RECOVERED", "SUCCESS! Payment completed via Razorpay Recovery Link. Won back ₹" + record.getAmount() + "!", "SUCCESS");
+            logAudit(orderNumber, "REVENUE_RECOVERED", "SUCCESS! Payment completed via Razorpay Instant Payment Link. Won back ₹" + record.getAmount() + "!", "SUCCESS");
             logAudit(orderNumber, "STOPPING_RULE_TRIGGERED", "Stopping Rule Triggered: Active recovery halted automatically due to payment success.", "INFO");
 
             result.put("success", true);
@@ -176,6 +178,83 @@ public class RevWinAgentService {
         }
 
         return result;
+    }
+
+    /**
+     * Automated Background Engine: Checks every 15 seconds for unrecovered orders older than 2 minutes
+     * and automatically dispatches omnichannel SMS/WhatsApp reminders.
+     */
+    @Scheduled(fixedRate = 15000)
+    @Transactional
+    public void runAutomatedReminderJob() {
+        List<PaymentRiskRecord> pendingRecords = riskRecordRepository.findByStatusIn(Arrays.asList("RECOVERING", "AT_RISK"));
+        LocalDateTime threshold = LocalDateTime.now().minusMinutes(2);
+
+        for (PaymentRiskRecord record : pendingRecords) {
+            if (record.getCreatedAt() != null && record.getCreatedAt().isBefore(threshold)) {
+                sendPaymentReminder(record);
+            }
+        }
+    }
+
+    @Transactional
+    public Map<String, Object> sendPaymentReminder(PaymentRiskRecord record) {
+        Map<String, Object> response = new HashMap<>();
+        String orderNumber = record.getOrderNumber();
+        String customerName = record.getCustomerName() != null ? record.getCustomerName() : "Customer";
+        String customerPhone = record.getCustomerPhone() != null ? record.getCustomerPhone() : "Customer Phone";
+        Double amount = record.getAmount() != null ? record.getAmount() : 0.0;
+        String recoveryUrl = record.getRecoveryLink() != null ? record.getRecoveryLink() : "http://localhost:8080/checkout/recovery/" + orderNumber;
+
+        // Stopping Rule: If already paid or recovered, halt
+        Optional<Order> orderOpt = orderRepository.findByOrderNumber(orderNumber);
+        if (orderOpt.isPresent() && "PAID".equalsIgnoreCase(orderOpt.get().getStatus())) {
+            record.setStatus("RECOVERED");
+            riskRecordRepository.save(record);
+            response.put("success", false);
+            response.put("message", "Order already paid. Reminder aborted.");
+            return response;
+        }
+
+        // Formulate 2-minute follow-up reminder payload
+        String reminderMsg = "Hi " + customerName + "! We noticed your order #" + orderNumber + " (₹" + amount + ") is still waiting. Your cart items are reserved! Complete your payment via your instant payment link: " + recoveryUrl;
+
+        // Log Intervention
+        RecoveryIntervention intervention = new RecoveryIntervention();
+        intervention.setRiskRecord(record);
+        intervention.setInterventionType("2_MIN_AUTOMATED_REMINDER");
+        intervention.setChannel("SMS_AND_WHATSAPP");
+        intervention.setPayloadMessage(reminderMsg);
+        intervention.setRecoveryUrl(recoveryUrl);
+        intervention.setAttemptNumber(record.getAttemptCount() + 1);
+        intervention.setStatus("SENT");
+        interventionRepository.save(intervention);
+
+        // Update Risk Record status to REMINDER_SENT
+        record.setStatus("REMINDER_SENT");
+        record.setAttemptCount(record.getAttemptCount() + 1);
+        riskRecordRepository.save(record);
+
+        // Log to Audit Ledger
+        logAudit(orderNumber, "REMINDER_DISPATCHED", "Automated 2-Min Follow-Up: Dispatched SMS & WhatsApp instant payment link to " + customerPhone + " for Order #" + orderNumber, "INFO");
+
+        response.put("success", true);
+        response.put("orderNumber", orderNumber);
+        response.put("status", "REMINDER_SENT");
+        response.put("message", reminderMsg);
+        return response;
+    }
+
+    @Transactional
+    public Map<String, Object> triggerManualReminder(String orderNumber) {
+        Optional<PaymentRiskRecord> recordOpt = riskRecordRepository.findFirstByOrderNumberOrderByCreatedAtDesc(orderNumber);
+        if (recordOpt.isPresent()) {
+            return sendPaymentReminder(recordOpt.get());
+        }
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", false);
+        response.put("message", "Order risk record not found.");
+        return response;
     }
 
     private void logAudit(String orderNumber, String eventType, String details, String status) {

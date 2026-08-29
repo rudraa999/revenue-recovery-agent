@@ -12,5 +12,6 @@ public interface PaymentRiskRecordRepository extends JpaRepository<PaymentRiskRe
     Optional<PaymentRiskRecord> findByOrderNumber(String orderNumber);
     Optional<PaymentRiskRecord> findFirstByOrderNumberOrderByCreatedAtDesc(String orderNumber);
     List<PaymentRiskRecord> findByStatusOrderByCreatedAtDesc(String status);
+    List<PaymentRiskRecord> findByStatusIn(List<String> statuses);
     List<PaymentRiskRecord> findAllByOrderByCreatedAtDesc();
 }
