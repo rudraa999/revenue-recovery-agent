@@ -8,6 +8,7 @@ import com.rudra.shop.repository.OrderRepository;
 import com.rudra.shop.repository.ProductRepository;
 import com.rudra.shop.repository.UserRepository;
 import com.rudra.shop.service.CartSessionService;
+import com.rudra.shop.service.RevWinAgentService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -31,6 +32,9 @@ public class CheckoutController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private RevWinAgentService revWinAgentService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -130,6 +134,47 @@ public class CheckoutController {
         response.put("customerPhone", customerPhone);
 
         return response;
+    }
+
+    @PostMapping("/checkout/fail-and-recover")
+    @ResponseBody
+    public Map<String, Object> simulateFailureAndRecover(
+            @RequestParam("customerName") String customerName,
+            @RequestParam("customerEmail") String customerEmail,
+            @RequestParam("customerPhone") String customerPhone,
+            @RequestParam(value = "failureCode", defaultValue = "GATEWAY_TIMEOUT") String failureCode,
+            HttpSession session,
+            Authentication authentication) {
+
+        Map<String, Object> initRes = initiateCheckout(customerName, customerEmail, customerPhone, session, authentication);
+        if (!Boolean.TRUE.equals(initRes.get("success"))) {
+            return initRes;
+        }
+
+        String orderNumber = (String) initRes.get("orderNumber");
+        Double amount = (Double) initRes.get("amount");
+
+        Map<String, Object> agentResponse = revWinAgentService.handlePaymentFailureWebhook(
+                orderNumber,
+                amount,
+                customerName,
+                customerEmail,
+                customerPhone,
+                failureCode,
+                "Bank Issuer Gateway Timeout (Network Outage)"
+        );
+
+        agentResponse.put("success", true);
+        agentResponse.put("orderNumber", orderNumber);
+        agentResponse.put("amount", amount);
+
+        return agentResponse;
+    }
+
+    @PostMapping("/checkout/complete-recovery")
+    @ResponseBody
+    public Map<String, Object> completeRecovery(@RequestParam("orderNumber") String orderNumber) {
+        return revWinAgentService.handlePaymentSuccessWebhook(orderNumber);
     }
 
     @GetMapping("/checkout/success/{orderNumber}")

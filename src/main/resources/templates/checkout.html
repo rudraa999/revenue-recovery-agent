@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Direct Checkout - The Arts Arcade</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -26,7 +26,7 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <!-- Customer Details & Payment Options (No Address Form) -->
+            <!-- Customer Contact Information -->
             <div class="lg:col-span-7 space-y-6">
                 
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
@@ -40,17 +40,17 @@
                     <form id="checkout-form" class="space-y-4">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1">Full Name *</label>
-                            <input type="text" id="customerName" name="customerName" th:value="${defaultName}" required placeholder="e.g. Rudra Sharma" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition outline-none">
+                            <input type="text" id="customerName" name="customerName" th:value="${defaultName}" required placeholder="e.g. Shruti Sharma" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition outline-none">
                         </div>
 
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1">Email Address *</label>
-                            <input type="email" id="customerEmail" name="customerEmail" th:value="${defaultEmail}" required placeholder="e.g. rudra@example.com" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition outline-none">
+                            <input type="email" id="customerEmail" name="customerEmail" th:value="${defaultEmail}" required placeholder="e.g. shruti@example.com" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition outline-none">
                         </div>
 
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1">Mobile / WhatsApp Number *</label>
-                            <input type="tel" id="customerPhone" name="customerPhone" th:value="${defaultPhone}" required placeholder="e.g. +91 9876543210" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition outline-none">
+                            <input type="tel" id="customerPhone" name="customerPhone" th:value="${defaultPhone}" required placeholder="e.g. +91 9822080206" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition outline-none">
                         </div>
                     </form>
                 </div>
@@ -61,7 +61,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
-                        Payment Gateway
+                        Official Razorpay Gateway
                     </h2>
                     <div class="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100 flex items-center justify-between">
                         <div class="flex items-center gap-3">
@@ -69,20 +69,20 @@
                                 RZP
                             </div>
                             <div>
-                                <p class="font-bold text-gray-900">Razorpay Direct Checkout</p>
-                                <p class="text-xs text-gray-500">Supports UPI, Credit/Debit Cards, NetBanking & Wallets</p>
+                                <p class="font-bold text-gray-900">Razorpay Standard Checkout</p>
+                                <p class="text-xs text-gray-500">Key ID: rzp_test_TVGefE9Hju6tLV</p>
                             </div>
                         </div>
-                        <span class="text-xs bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full font-bold">256-Bit Encrypted</span>
+                        <span class="text-xs bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full font-bold">HMAC-SHA256 Verified</span>
                     </div>
                 </div>
 
             </div>
 
-            <!-- Order Items Summary Sidebar -->
+            <!-- Order Summary & Payment Actions -->
             <div class="lg:col-span-5">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 sticky top-24 space-y-6">
-                    <h2 class="text-xl font-bold text-gray-900">Order Items</h2>
+                    <h2 class="text-xl font-bold text-gray-900">Order Summary</h2>
 
                     <div class="space-y-4 max-h-64 overflow-y-auto pr-1">
                         <div th:each="item : ${cartItems}" class="flex items-center gap-3 pb-3 border-b border-gray-100">
@@ -100,7 +100,7 @@
                     <div class="space-y-2 border-t border-gray-100 pt-4 text-sm text-gray-600">
                         <div class="flex justify-between">
                             <span>Subtotal</span>
-                            <span class="font-semibold text-gray-900">₹<span th:text="${#numbers.formatDecimal(subtotal, 1, 2)}">0.00</span></span>
+                            <span class="font-semibold text-gray-900">₹<span id="orderSubtotal" th:text="${#numbers.formatDecimal(subtotal, 1, 2)}">0.00</span></span>
                         </div>
                         <div class="flex justify-between">
                             <span>Delivery Fee</span>
@@ -108,14 +108,39 @@
                         </div>
                         <div class="flex justify-between text-base font-bold text-gray-900 border-t border-gray-100 pt-3">
                             <span>Total Amount</span>
-                            <span class="text-rose-600 text-xl">₹<span th:text="${#numbers.formatDecimal(grandTotal, 1, 2)}">0.00</span></span>
+                            <span class="text-rose-600 text-xl">₹<span id="orderGrandTotal" th:text="${#numbers.formatDecimal(grandTotal, 1, 2)}">0.00</span></span>
                         </div>
                     </div>
 
                     <!-- Direct Action Buttons -->
-                    <button type="button" id="payNowBtn" onclick="processCheckout()" class="w-full flex items-center justify-center gap-2 py-4 px-6 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-lg shadow-rose-200 transition-all text-base cursor-pointer">
-                        <span>Pay ₹<span th:text="${#numbers.formatDecimal(grandTotal, 1, 2)}">0.00</span> via Razorpay</span>
-                    </button>
+                    <div class="space-y-3">
+                        <button type="button" id="payNowBtn" onclick="openRazorpayStandardCheckout()" class="w-full flex items-center justify-center gap-2 py-4 px-6 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-lg shadow-rose-200 transition-all text-base cursor-pointer">
+                            <span>Pay ₹<span th:text="${#numbers.formatDecimal(grandTotal, 1, 2)}">0.00</span> via Razorpay</span>
+                        </button>
+
+                        <button type="button" onclick="simulateGatewayTimeoutFailure()" class="w-full flex items-center justify-center gap-2 py-3.5 px-6 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl shadow-md transition-all text-xs cursor-pointer">
+                            <span>⚠️ Simulate Bank Gateway Timeout (Trigger RevWin AI)</span>
+                        </button>
+                    </div>
+
+                    <!-- Live AI Agent Recovery Banner -->
+                    <div id="aiRecoveryBanner" class="hidden p-5 rounded-2xl bg-slate-900 text-white border border-rose-500/40 space-y-3 shadow-xl">
+                        <div class="flex items-center justify-between">
+                            <span class="bg-rose-500 text-white text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-1 rounded-full">RevWin AI Recovery Agent</span>
+                            <span class="text-xs text-amber-400 font-mono">GATEWAY_TIMEOUT</span>
+                        </div>
+
+                        <div class="text-xs space-y-1.5 font-mono">
+                            <p class="text-slate-300"><strong class="text-rose-400">Diagnosis:</strong> Bank Issuer Server Timeout (Outage)</p>
+                            <p class="text-slate-300"><strong class="text-indigo-400">Action:</strong> Generated Razorpay Smart Recovery Link (Backup Gateway Route)</p>
+                        </div>
+
+                        <div class="p-3 bg-slate-950 rounded-xl text-xs text-slate-300 border border-slate-800 font-mono" id="aiMessageText"></div>
+
+                        <button type="button" id="completeRecoveryBtn" onclick="completeRecoveryPayment()" class="w-full flex items-center justify-center gap-2 py-3 px-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold rounded-xl shadow-lg transition-all text-sm cursor-pointer">
+                            <span>Complete Payment via Backup Gateway Link</span>
+                        </button>
+                    </div>
 
                     <div id="statusMessage" class="hidden p-3 rounded-xl text-center text-sm font-medium"></div>
                 </div>
@@ -126,39 +151,166 @@
     <div th:replace="~{fragments/footer :: footer}"></div>
 
     <script>
-        function processCheckout() {
+        let currentOrderNumber = "";
+
+        function getContactDetails() {
             const name = document.getElementById('customerName').value;
             const email = document.getElementById('customerEmail').value;
             const phone = document.getElementById('customerPhone').value;
-            const statusDiv = document.getElementById('statusMessage');
 
             if (!name || !email || !phone) {
-                statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-red-100 text-red-700 block";
-                statusDiv.innerText = "Please fill in all contact details to proceed.";
-                return;
+                alert("Please fill in customer name, email, and mobile phone number.");
+                return null;
             }
+            return { name, email, phone };
+        }
 
+        function openRazorpayStandardCheckout() {
+            const details = getContactDetails();
+            if (!details) return;
+
+            const statusDiv = document.getElementById('statusMessage');
             statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-blue-100 text-blue-700 block";
-            statusDiv.innerText = "Initiating order & secure payment...";
+            statusDiv.innerText = "Creating Razorpay order...";
 
+            // STEP 1: Initiate Order in store database
             fetch('/checkout/initiate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'customerName=' + encodeURIComponent(name) + '&customerEmail=' + encodeURIComponent(email) + '&customerPhone=' + encodeURIComponent(phone)
+                body: 'customerName=' + encodeURIComponent(details.name) + '&customerEmail=' + encodeURIComponent(details.email) + '&customerPhone=' + encodeURIComponent(details.phone)
+            })
+            .then(res => res.json())
+            .then(storeOrder => {
+                if (!storeOrder.success) {
+                    statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-red-100 text-red-700 block";
+                    statusDiv.innerText = storeOrder.message || "Failed to initiate order.";
+                    return;
+                }
+
+                currentOrderNumber = storeOrder.orderNumber;
+                const totalAmount = storeOrder.amount;
+
+                // STEP 2: Call Backend POST /api/create-order (Razorpay API)
+                fetch('/api/create-order?amount=' + totalAmount + '&receipt=' + storeOrder.orderNumber, {
+                    method: 'POST'
+                })
+                .then(res => res.json())
+                .then(rzpOrder => {
+                    if (rzpOrder.error) {
+                        statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-amber-100 text-amber-800 block";
+                        statusDiv.innerText = "Payment interrupted (" + rzpOrder.error + "). Triggering RevWin AI Recovery Agent...";
+                        triggerFailureAgent(details, "GATEWAY_TIMEOUT");
+                        return;
+                    }
+
+                    // STEP 3: Open Razorpay Standard Checkout Modal
+                    const options = {
+                        key: rzpOrder.key_id,
+                        amount: rzpOrder.amount,
+                        currency: rzpOrder.currency,
+                        name: "The Arts Arcade",
+                        description: "Order #" + storeOrder.orderNumber,
+                        order_id: rzpOrder.order_id,
+                        prefill: {
+                            name: details.name,
+                            email: details.email,
+                            contact: details.phone
+                        },
+                        theme: {
+                            color: "#e11d48"
+                        },
+                        handler: function (response) {
+                            statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-blue-100 text-blue-700 block";
+                            statusDiv.innerText = "Verifying HMAC-SHA256 payment signature...";
+
+                            fetch('/api/verify-payment?razorpay_order_id=' + encodeURIComponent(response.razorpay_order_id) +
+                                  '&razorpay_payment_id=' + encodeURIComponent(response.razorpay_payment_id) +
+                                  '&razorpay_signature=' + encodeURIComponent(response.razorpay_signature) +
+                                  '&orderNumber=' + encodeURIComponent(storeOrder.orderNumber), {
+                                method: 'POST'
+                            })
+                            .then(vRes => vRes.json())
+                            .then(vData => {
+                                if (vData.success) {
+                                    window.location.href = '/checkout/success/' + storeOrder.orderNumber;
+                                } else {
+                                    statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-red-100 text-red-700 block";
+                                    statusDiv.innerText = vData.message || "Payment signature verification failed.";
+                                }
+                            });
+                        },
+                        modal: {
+                            ondismiss: function () {
+                                statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-amber-100 text-amber-800 block";
+                                statusDiv.innerText = "Checkout modal dismissed. Triggering RevWin AI Recovery Agent...";
+                                triggerFailureAgent(details, "CHECKOUT_DISMISSED");
+                            }
+                        }
+                    };
+
+                    try {
+                        const rzpModal = new Razorpay(options);
+                        rzpModal.on('payment.failed', function (response) {
+                            statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-red-100 text-red-700 block";
+                            statusDiv.innerText = "Payment failed. Triggering RevWin AI Recovery Agent...";
+                            triggerFailureAgent(details, response.error ? response.error.code : "GATEWAY_TIMEOUT");
+                        });
+
+                        rzpModal.open();
+                    } catch (ex) {
+                        statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-amber-100 text-amber-800 block";
+                        statusDiv.innerText = "Payment Gateway Interrupted. Triggering RevWin AI Agent...";
+                        triggerFailureAgent(details, "GATEWAY_TIMEOUT");
+                    }
+                })
+                .catch(err => {
+                    statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-amber-100 text-amber-800 block";
+                    statusDiv.innerText = "Connecting fallback... Triggering RevWin AI Recovery Agent...";
+                    triggerFailureAgent(details, "GATEWAY_TIMEOUT");
+                });
+            });
+        }
+
+        function triggerFailureAgent(details, failureCode) {
+            fetch('/checkout/fail-and-recover', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'customerName=' + encodeURIComponent(details.name) + '&customerEmail=' + encodeURIComponent(details.email) + '&customerPhone=' + encodeURIComponent(details.phone) + '&failureCode=' + failureCode
             })
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    // Redirect to payment completion screen / Razorpay modal trigger
-                    window.location.href = '/checkout/success/' + data.orderNumber;
-                } else {
-                    statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-red-100 text-red-700 block";
-                    statusDiv.innerText = data.message || "Failed to initiate payment.";
+                    currentOrderNumber = data.orderNumber;
+                    document.getElementById('aiRecoveryBanner').classList.remove('hidden');
+                    document.getElementById('aiMessageText').innerText = data.message;
                 }
+            });
+        }
+
+        function simulateGatewayTimeoutFailure() {
+            const details = getContactDetails();
+            if (!details) return;
+
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-amber-100 text-amber-800 block";
+            statusDiv.innerText = "Simulating bank gateway timeout...";
+
+            triggerFailureAgent(details, "GATEWAY_TIMEOUT");
+        }
+
+        function completeRecoveryPayment() {
+            if (!currentOrderNumber) return;
+
+            fetch('/checkout/complete-recovery', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'orderNumber=' + encodeURIComponent(currentOrderNumber)
             })
-            .catch(err => {
-                statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-red-100 text-red-700 block";
-                statusDiv.innerText = "Error connecting to payment gateway.";
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/checkout/success/' + currentOrderNumber;
+                }
             });
         }
     </script>

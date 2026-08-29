@@ -31,10 +31,13 @@
                     class="block py-2.5 px-6 transition duration-200 hover:bg-gray-700 bg-gray-700">Dashboard</a>
                 <a href="/admin/products" class="block py-2.5 px-6 transition duration-200 hover:bg-gray-700">Manage
                     Products</a>
+                <a href="/admin/revenue-recovery" class="block py-2.5 px-6 transition duration-200 hover:bg-rose-900 bg-rose-950/60 text-rose-300 font-bold border-l-4 border-rose-500 flex items-center gap-2">
+                    <span>🤖 RevWin AI Agent</span>
+                </a>
                 <a href="/" class="block py-2.5 px-6 transition duration-200 hover:bg-gray-700">Back to Shop</a>
                 <form th:action="@{/logout}" method="post" class="block px-6 py-4 mt-4">
                     <button type="submit"
-                        class="w-full text-center py-2.5 px-4 rounded bg-red-600 hover:bg-red-700 text-white transition duration-200 font-semibold shadow-md">Logout</button>
+                        class="w-full text-center py-2.5 px-4 rounded bg-red-600 hover:bg-red-700 text-white transition duration-200 font-semibold shadow-md cursor-pointer">Logout</button>
                 </form>
             </nav>
         </div>
@@ -66,12 +69,16 @@
                         <h3 class="text-lg font-bold text-gray-800 mb-4">Quick Actions</h3>
                         <div class="flex flex-col sm:flex-row gap-3">
                             <a href="/admin/products/add"
-                                class="text-center bg-indigo-600 text-white px-5 py-2.5 rounded-lg hover:bg-indigo-700 transition font-medium shadow-sm flex-1">
+                                class="text-center bg-indigo-600 text-white px-4 py-2.5 rounded-lg hover:bg-indigo-700 transition font-medium shadow-sm flex-1">
                                 Add New Product
                             </a>
                             <a href="/admin/products"
-                                class="text-center bg-gray-800 text-white px-5 py-2.5 rounded-lg hover:bg-gray-900 transition font-medium shadow-sm flex-1">
+                                class="text-center bg-gray-800 text-white px-4 py-2.5 rounded-lg hover:bg-gray-900 transition font-medium shadow-sm flex-1">
                                 View All Products
+                            </a>
+                            <a href="/admin/revenue-recovery"
+                                class="text-center bg-rose-600 text-white px-4 py-2.5 rounded-lg hover:bg-rose-700 transition font-bold shadow-sm flex-1 flex items-center justify-center gap-1.5">
+                                <span>🤖 RevWin AI Agent</span>
                             </a>
                         </div>
                     </div>
