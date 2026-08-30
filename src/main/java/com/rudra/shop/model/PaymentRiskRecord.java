@@ -31,6 +31,16 @@ public class PaymentRiskRecord {
 
     private String recoveryLink;
     private int attemptCount = 0;
+    private int cadenceStage = 0; // 0: Initial, 1: 5-min, 2: 3-hr, 3: 6-hr (10% Promo for >10k), 4: 9-hr Final
+
+    private String appliedPromoCode;
+    private Double discountAmount = 0.0;
+    private Double originalAmount;
+
+    private String actionTaken; // Descriptive action executed by the autonomous agent
+
+    private LocalDateTime lastReminderSentAt;
+    private LocalDateTime nextReminderAt;
 
     private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt = LocalDateTime.now();

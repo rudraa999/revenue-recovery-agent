@@ -8,6 +8,7 @@ import com.rudra.shop.repository.OrderRepository;
 import com.rudra.shop.repository.ProductRepository;
 import com.rudra.shop.repository.UserRepository;
 import com.rudra.shop.service.CartSessionService;
+import com.rudra.shop.service.PromoCodeService;
 import com.rudra.shop.service.RevWinAgentService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,12 +38,20 @@ public class CheckoutController {
     private RevWinAgentService revWinAgentService;
 
     @Autowired
+    private PromoCodeService promoCodeService;
+
+    @Autowired
     private com.rudra.shop.repository.PaymentRiskRecordRepository riskRecordRepository;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @GetMapping("/checkout")
-    public String showCheckoutPage(HttpSession session, Authentication authentication, Model model) {
+    public String showCheckoutPage(
+            @RequestParam(value = "promo", required = false) String promoCodeParam,
+            HttpSession session,
+            Authentication authentication,
+            Model model) {
+
         List<CartItemDto> cartItems = cartSessionService.getCart(session);
         if (cartItems == null || cartItems.isEmpty()) {
             return "redirect:/products";
@@ -50,7 +59,27 @@ public class CheckoutController {
 
         double subtotal = cartSessionService.getCartTotal(session);
         double shippingFee = 0.0;
-        double grandTotal = subtotal + shippingFee;
+
+        String appliedPromo = promoCodeParam != null && !promoCodeParam.trim().isEmpty()
+                ? promoCodeParam.trim()
+                : (String) session.getAttribute("APPLIED_PROMO_CODE");
+
+        double discount = 0.0;
+        if (appliedPromo != null && !appliedPromo.trim().isEmpty()) {
+            Map<String, Object> promoRes = promoCodeService.validateAndApplyPromo(appliedPromo, subtotal, null);
+            if (Boolean.TRUE.equals(promoRes.get("valid"))) {
+                discount = (Double) promoRes.get("discountAmount");
+                appliedPromo = (String) promoRes.get("code");
+                session.setAttribute("APPLIED_PROMO_CODE", appliedPromo);
+                session.setAttribute("APPLIED_DISCOUNT_AMOUNT", discount);
+            } else {
+                appliedPromo = null;
+                session.removeAttribute("APPLIED_PROMO_CODE");
+                session.removeAttribute("APPLIED_DISCOUNT_AMOUNT");
+            }
+        }
+
+        double grandTotal = Math.max(0.0, subtotal + shippingFee - discount);
 
         String defaultName = "";
         String defaultEmail = "";
@@ -67,6 +96,8 @@ public class CheckoutController {
         model.addAttribute("cartItems", cartItems);
         model.addAttribute("subtotal", subtotal);
         model.addAttribute("shippingFee", shippingFee);
+        model.addAttribute("discount", discount);
+        model.addAttribute("appliedPromo", appliedPromo);
         model.addAttribute("grandTotal", grandTotal);
         model.addAttribute("defaultName", defaultName);
         model.addAttribute("defaultEmail", defaultEmail);
@@ -90,6 +121,7 @@ public class CheckoutController {
             @RequestParam("customerName") String customerName,
             @RequestParam("customerEmail") String customerEmail,
             @RequestParam("customerPhone") String customerPhone,
+            @RequestParam(value = "promoCode", required = false) String promoCode,
             HttpSession session,
             Authentication authentication) {
 
@@ -102,7 +134,21 @@ public class CheckoutController {
             return response;
         }
 
-        double totalAmount = cartSessionService.getCartTotal(session);
+        double subtotal = cartSessionService.getCartTotal(session);
+        double discount = 0.0;
+        String appliedPromo = promoCode != null && !promoCode.trim().isEmpty() ? promoCode.trim() : (String) session.getAttribute("APPLIED_PROMO_CODE");
+
+        if (appliedPromo != null && !appliedPromo.trim().isEmpty()) {
+            Map<String, Object> promoRes = promoCodeService.validateAndApplyPromo(appliedPromo, subtotal, null);
+            if (Boolean.TRUE.equals(promoRes.get("valid"))) {
+                discount = (Double) promoRes.get("discountAmount");
+                appliedPromo = (String) promoRes.get("code");
+            } else {
+                appliedPromo = null;
+            }
+        }
+
+        double finalAmount = Math.max(1.0, subtotal - discount);
         String orderNumber = "ORD-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 
         Order order = new Order();
@@ -110,7 +156,10 @@ public class CheckoutController {
         order.setCustomerName(customerName);
         order.setCustomerEmail(customerEmail);
         order.setCustomerPhone(customerPhone);
-        order.setTotalAmount(totalAmount);
+        order.setOriginalAmount(subtotal);
+        order.setDiscountAmount(discount);
+        order.setPromoCode(appliedPromo);
+        order.setTotalAmount(finalAmount);
         order.setStatus("PENDING_PAYMENT");
 
         if (authentication != null && authentication.isAuthenticated() && !authentication.getName().equals("anonymousUser")) {
@@ -131,7 +180,10 @@ public class CheckoutController {
         response.put("success", true);
         response.put("orderNumber", savedOrder.getOrderNumber());
         response.put("orderId", savedOrder.getId());
-        response.put("amount", totalAmount);
+        response.put("amount", finalAmount);
+        response.put("originalAmount", subtotal);
+        response.put("discountAmount", discount);
+        response.put("promoCode", appliedPromo);
         response.put("customerName", customerName);
         response.put("customerEmail", customerEmail);
         response.put("customerPhone", customerPhone);
@@ -145,11 +197,12 @@ public class CheckoutController {
             @RequestParam("customerName") String customerName,
             @RequestParam("customerEmail") String customerEmail,
             @RequestParam("customerPhone") String customerPhone,
+            @RequestParam(value = "promoCode", required = false) String promoCode,
             @RequestParam(value = "failureCode", defaultValue = "GATEWAY_TIMEOUT") String failureCode,
             HttpSession session,
             Authentication authentication) {
 
-        Map<String, Object> initRes = initiateCheckout(customerName, customerEmail, customerPhone, session, authentication);
+        Map<String, Object> initRes = initiateCheckout(customerName, customerEmail, customerPhone, promoCode, session, authentication);
         if (!Boolean.TRUE.equals(initRes.get("success"))) {
             return initRes;
         }
@@ -164,7 +217,7 @@ public class CheckoutController {
                 customerEmail,
                 customerPhone,
                 failureCode,
-                "Bank Issuer Gateway Timeout (Network Outage)"
+                "Simulated failure: " + failureCode
         );
 
         agentResponse.put("success", true);
@@ -181,13 +234,30 @@ public class CheckoutController {
     }
 
     @GetMapping("/checkout/recovery/{orderNumber}")
-    public String showRecoveryPage(@PathVariable("orderNumber") String orderNumber, Model model) {
+    public String showRecoveryPage(
+            @PathVariable("orderNumber") String orderNumber,
+            @RequestParam(value = "promo", required = false) String promo,
+            Model model) {
+
         Optional<Order> orderOpt = orderRepository.findByOrderNumber(orderNumber);
         if (orderOpt.isPresent()) {
-            model.addAttribute("order", orderOpt.get());
+            Order order = orderOpt.get();
+            model.addAttribute("order", order);
         }
+
         riskRecordRepository.findFirstByOrderNumberOrderByCreatedAtDesc(orderNumber)
-                .ifPresent(record -> model.addAttribute("riskRecord", record));
+                .ifPresent(record -> {
+                    model.addAttribute("riskRecord", record);
+                    if (record.getAppliedPromoCode() != null) {
+                        model.addAttribute("appliedPromo", record.getAppliedPromoCode());
+                        model.addAttribute("discountAmount", record.getDiscountAmount());
+                    }
+                });
+
+        if (promo != null && !promo.trim().isEmpty()) {
+            model.addAttribute("promoParam", promo.trim());
+        }
+
         return "recovery";
     }
 
@@ -198,6 +268,8 @@ public class CheckoutController {
             Order order = orderOpt.get();
             model.addAttribute("order", order);
             cartSessionService.clearCart(session);
+            session.removeAttribute("APPLIED_PROMO_CODE");
+            session.removeAttribute("APPLIED_DISCOUNT_AMOUNT");
             return "success";
         }
         return "redirect:/";

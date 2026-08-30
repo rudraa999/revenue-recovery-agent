@@ -17,10 +17,10 @@ import java.util.UUID;
 @Service
 public class RazorpayService {
 
-    @Value("${razorpay.key.id:rzp_test_TVGefE9Hju6tLV}")
+    @Value("${razorpay.key.id}")
     private String razorpayKeyId;
 
-    @Value("${razorpay.key.secret:TUxQIjALHQVuoxxEY9KZDbg5}")
+    @Value("${razorpay.key.secret}")
     private String razorpayKeySecret;
 
     public String getRazorpayKeyId() {

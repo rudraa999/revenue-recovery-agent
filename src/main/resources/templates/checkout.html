@@ -55,6 +55,22 @@
                     </form>
                 </div>
 
+                <!-- Promo Code Box -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h2 class="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                        </svg>
+                        Apply Promo Code / Discount Coupon
+                    </h2>
+                    <div class="flex gap-2">
+                        <input type="text" id="promoCodeInput" th:value="${appliedPromo}" placeholder="Try WELCOME10, ART50, FESTIVE15" class="flex-grow px-4 py-2.5 uppercase font-semibold text-gray-800 rounded-xl border border-gray-300 focus:ring-2 focus:ring-rose-500 outline-none text-sm">
+                        <button type="button" onclick="applyPromoCode()" class="px-5 py-2.5 bg-gray-900 hover:bg-black text-white font-semibold rounded-xl text-sm transition">Apply</button>
+                        <button type="button" id="removePromoBtn" onclick="removePromoCode()" th:class="${appliedPromo != null ? 'px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl text-sm transition' : 'hidden px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl text-sm transition'}">Remove</button>
+                    </div>
+                    <div id="promoMessage" class="mt-2 text-xs font-medium"></div>
+                </div>
+
                 <!-- Payment Method Info -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                     <h2 class="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
@@ -70,7 +86,7 @@
                             </div>
                             <div>
                                 <p class="font-bold text-gray-900">Razorpay Standard Checkout</p>
-                                <p class="text-xs text-gray-500">Key ID: rzp_test_TVGefE9Hju6tLV</p>
+                                <p class="text-xs text-gray-500">All UPI Apps, Cards, NetBanking, & Wallets Supported</p>
                             </div>
                         </div>
                         <span class="text-xs bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full font-bold">HMAC-SHA256 Verified</span>
@@ -106,6 +122,10 @@
                             <span>Delivery Fee</span>
                             <span class="text-emerald-600 font-semibold">FREE</span>
                         </div>
+                        <div id="discountRow" th:class="${discount > 0 ? 'flex justify-between text-emerald-600 font-semibold' : 'hidden flex justify-between text-emerald-600 font-semibold'}">
+                            <span>Coupon Discount (<span id="appliedPromoLabel" th:text="${appliedPromo}"></span>)</span>
+                            <span>-₹<span id="orderDiscount" th:text="${#numbers.formatDecimal(discount, 1, 2)}">0.00</span></span>
+                        </div>
                         <div class="flex justify-between text-base font-bold text-gray-900 border-t border-gray-100 pt-3">
                             <span>Total Amount</span>
                             <span class="text-rose-600 text-xl">₹<span id="orderGrandTotal" th:text="${#numbers.formatDecimal(grandTotal, 1, 2)}">0.00</span></span>
@@ -115,12 +135,24 @@
                     <!-- Direct Action Buttons -->
                     <div class="space-y-3">
                         <button type="button" id="payNowBtn" onclick="openRazorpayStandardCheckout()" class="w-full flex items-center justify-center gap-2 py-4 px-6 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-lg shadow-rose-200 transition-all text-base cursor-pointer">
-                            <span>Pay ₹<span th:text="${#numbers.formatDecimal(grandTotal, 1, 2)}">0.00</span> via Razorpay</span>
+                            <span>Pay ₹<span id="payBtnAmount" th:text="${#numbers.formatDecimal(grandTotal, 1, 2)}">0.00</span> via Razorpay</span>
                         </button>
 
-                        <button type="button" onclick="simulateGatewayTimeoutFailure()" class="w-full flex items-center justify-center gap-2 py-3.5 px-6 bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium rounded-xl shadow-md transition-all text-xs cursor-pointer">
-                            <span>⚠️ Simulate Bank Gateway Timeout (Trigger Finance Agent)</span>
-                        </button>
+                        <div class="border-t border-gray-100 pt-3 space-y-2">
+                            <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wider text-center">Autonomous Recovery Agent Simulation</p>
+                            
+                            <button type="button" onclick="simulateFailure('GATEWAY_TIMEOUT')" class="w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium rounded-xl transition text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+                                <span>⚠️ Simulate Bank Gateway Timeout</span>
+                            </button>
+
+                            <button type="button" onclick="simulateFailure('UPI_DECLINED')" class="w-full py-2.5 px-3 bg-indigo-900/80 hover:bg-indigo-900 text-indigo-100 font-medium rounded-xl transition text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+                                <span>📱 Simulate UPI Decline / App Interruption</span>
+                            </button>
+
+                            <button type="button" onclick="simulateFailure('INSUFFICIENT_FUNDS')" class="w-full py-2.5 px-3 bg-amber-950/80 hover:bg-amber-950 text-amber-100 font-medium rounded-xl transition text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+                                <span>💳 Simulate Insufficient Bank Balance</span>
+                            </button>
+                        </div>
                     </div>
 
                     <div id="statusMessage" class="hidden p-3 rounded-xl text-center text-sm font-medium"></div>
@@ -133,6 +165,8 @@
 
     <script>
         let currentOrderNumber = "";
+        let currentAppliedPromo = /*[[${appliedPromo}]]*/ "";
+        let currentSubtotal = parseFloat(document.getElementById('orderSubtotal').innerText.replace(/,/g, '')) || 0;
 
         function getContactDetails() {
             const name = document.getElementById('customerName').value;
@@ -146,6 +180,50 @@
             return { name, email, phone };
         }
 
+        function applyPromoCode() {
+            const code = document.getElementById('promoCodeInput').value.trim();
+            const msgDiv = document.getElementById('promoMessage');
+            if (!code) {
+                msgDiv.className = "mt-2 text-xs font-semibold text-red-600";
+                msgDiv.innerText = "Please enter a coupon code.";
+                return;
+            }
+
+            fetch('/api/promo/apply', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'code=' + encodeURIComponent(code) + '&orderTotal=' + currentSubtotal
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.valid) {
+                    msgDiv.className = "mt-2 text-xs font-semibold text-emerald-600";
+                    msgDiv.innerText = data.message;
+                    currentAppliedPromo = data.code;
+                    document.getElementById('appliedPromoLabel').innerText = data.code;
+                    document.getElementById('orderDiscount').innerText = data.discountAmount.toFixed(2);
+                    document.getElementById('discountRow').classList.remove('hidden');
+                    document.getElementById('orderGrandTotal').innerText = data.newTotal.toFixed(2);
+                    document.getElementById('payBtnAmount').innerText = data.newTotal.toFixed(2);
+                    document.getElementById('removePromoBtn').classList.remove('hidden');
+                } else {
+                    msgDiv.className = "mt-2 text-xs font-semibold text-red-600";
+                    msgDiv.innerText = data.message;
+                }
+            })
+            .catch(e => {
+                msgDiv.className = "mt-2 text-xs font-semibold text-red-600";
+                msgDiv.innerText = "Failed to apply coupon.";
+            });
+        }
+
+        function removePromoCode() {
+            fetch('/api/promo/remove', { method: 'POST' })
+            .then(() => {
+                window.location.href = '/checkout';
+            });
+        }
+
         function openRazorpayStandardCheckout() {
             const details = getContactDetails();
             if (!details) return;
@@ -155,10 +233,14 @@
             statusDiv.innerText = "Opening secure Razorpay payment gateway...";
 
             // STEP 1: Initiate Order in store database
+            const promo = document.getElementById('promoCodeInput').value.trim();
             fetch('/checkout/initiate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'customerName=' + encodeURIComponent(details.name) + '&customerEmail=' + encodeURIComponent(details.email) + '&customerPhone=' + encodeURIComponent(details.phone)
+                body: 'customerName=' + encodeURIComponent(details.name) + 
+                      '&customerEmail=' + encodeURIComponent(details.email) + 
+                      '&customerPhone=' + encodeURIComponent(details.phone) +
+                      '&promoCode=' + encodeURIComponent(promo)
             })
             .then(res => res.json())
             .then(storeOrder => {
@@ -178,7 +260,7 @@
                 })
                 .then(res => res.json())
                 .then(rzpOrder => {
-                    const keyId = (rzpOrder && rzpOrder.key_id && !rzpOrder.error) ? rzpOrder.key_id : "rzp_test_TVGefE9Hju6tLV";
+                    const keyId = rzpOrder ? rzpOrder.key_id : null;
                     const orderId = (rzpOrder && rzpOrder.order_id && !rzpOrder.error) ? rzpOrder.order_id : null;
 
                     // STEP 3: Open Razorpay Standard Checkout Modal
@@ -219,7 +301,7 @@
                         modal: {
                             ondismiss: function () {
                                 statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-amber-100 text-amber-800 block";
-                                statusDiv.innerText = "Checkout dismissed. Redirecting to Finance Agent recovery...";
+                                statusDiv.innerText = "Checkout dismissed. Autonomous Agent activating recovery...";
                                 triggerFailureAgent(details, "CHECKOUT_DISMISSED", storeOrder.orderNumber);
                             }
                         }
@@ -234,7 +316,7 @@
                         rzpModal.on('payment.failed', function (response) {
                             const errCode = (response && response.error && response.error.code) ? response.error.code : "GATEWAY_TIMEOUT";
                             statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-red-100 text-red-700 block";
-                            statusDiv.innerText = "Payment interrupted at bank gateway. Redirecting to recovery page...";
+                            statusDiv.innerText = "Payment interrupted at bank gateway. Activating Recovery Agent...";
                             triggerFailureAgent(details, errCode, storeOrder.orderNumber);
                         });
 
@@ -252,21 +334,19 @@
         }
 
         function triggerFailureAgent(details, failureCode, existingOrderNumber) {
-            const statusDiv = document.getElementById('statusMessage');
-            if (statusDiv) {
-                statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-amber-100 text-amber-800 block";
-                statusDiv.innerText = "Payment interrupted. Finance Agent activating recovery...";
-            }
-
+            const promo = document.getElementById('promoCodeInput').value.trim();
             fetch('/checkout/fail-and-recover', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'customerName=' + encodeURIComponent(details.name) + '&customerEmail=' + encodeURIComponent(details.email) + '&customerPhone=' + encodeURIComponent(details.phone) + '&failureCode=' + failureCode
+                body: 'customerName=' + encodeURIComponent(details.name) + 
+                      '&customerEmail=' + encodeURIComponent(details.email) + 
+                      '&customerPhone=' + encodeURIComponent(details.phone) + 
+                      '&promoCode=' + encodeURIComponent(promo) +
+                      '&failureCode=' + encodeURIComponent(failureCode)
             })
             .then(res => res.json())
             .then(data => {
                 if (data.success && data.orderNumber) {
-                    // Redirect directly to the dedicated recovery page!
                     window.location.href = '/checkout/recovery/' + data.orderNumber;
                 } else if (existingOrderNumber) {
                     window.location.href = '/checkout/recovery/' + existingOrderNumber;
@@ -279,31 +359,15 @@
             });
         }
 
-        function simulateGatewayTimeoutFailure() {
+        function simulateFailure(code) {
             const details = getContactDetails();
             if (!details) return;
 
             const statusDiv = document.getElementById('statusMessage');
             statusDiv.className = "p-3 rounded-xl text-center text-sm font-medium bg-amber-100 text-amber-800 block";
-            statusDiv.innerText = "Simulating bank gateway timeout... Redirecting to Finance Agent Recovery...";
+            statusDiv.innerText = "Simulating " + code + "... Autonomous Recovery Agent Activating...";
 
-            triggerFailureAgent(details, "GATEWAY_TIMEOUT");
-        }
-
-        function completeRecoveryPayment() {
-            if (!currentOrderNumber) return;
-
-            fetch('/checkout/complete-recovery', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'orderNumber=' + encodeURIComponent(currentOrderNumber)
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.href = '/checkout/success/' + currentOrderNumber;
-                }
-            });
+            triggerFailureAgent(details, code);
         }
     </script>
 </body>

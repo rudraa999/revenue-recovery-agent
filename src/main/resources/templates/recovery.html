@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Recovery - The Arts Arcade</title>
+    <title>Payment Recovery & Checkout - The Arts Arcade</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
@@ -27,21 +27,33 @@
             <div class="p-6 sm:p-8 bg-slate-50/70 border-b border-slate-200">
                 <div class="flex items-center justify-between gap-3 mb-4">
                     <span class="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full border border-indigo-200">
-                        <span>🛡️ Finance Agent</span>
+                        <span>🛡️ Autonomous Recovery Agent</span>
                     </span>
-                    <span class="text-xs font-mono font-bold text-slate-800 bg-white px-2.5 py-1 rounded-md border border-slate-300 shadow-sm" th:text="${riskRecord != null ? riskRecord.failureCode : 'CHECKOUT_DISMISSED'}">
-                        CHECKOUT_DISMISSED
+                    <span class="text-xs font-mono font-bold text-slate-800 bg-white px-2.5 py-1 rounded-md border border-slate-300 shadow-sm" th:text="${riskRecord != null ? riskRecord.failureCode : 'RECOVERY_SESSION'}">
+                        GATEWAY_TIMEOUT
                     </span>
                 </div>
 
                 <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950">
-                    <span th:if="${riskRecord != null and riskRecord.failureCode == 'CHECKOUT_DISMISSED'}">Your Cart is Reserved</span>
-                    <span th:unless="${riskRecord != null and riskRecord.failureCode == 'CHECKOUT_DISMISSED'}">Payment Interrupted</span>
+                    <span th:if="${riskRecord != null and riskRecord.failureCode == 'CHECKOUT_DISMISSED'}">Your Handcrafted Cart is Reserved</span>
+                    <span th:unless="${riskRecord != null and riskRecord.failureCode == 'CHECKOUT_DISMISSED'}">Payment Interrupted - We've Saved Your Order</span>
                 </h1>
-                <p class="text-slate-700 text-sm mt-2 font-medium leading-relaxed">
-                    <span th:if="${riskRecord != null and riskRecord.failureCode == 'CHECKOUT_DISMISSED'}">We held your items so you won't lose them. Complete your checkout below.</span>
-                    <span th:unless="${riskRecord != null and riskRecord.failureCode == 'CHECKOUT_DISMISSED'}">An issue occurred at the bank gateway. Your reserved items are ready for checkout.</span>
+                
+                <p class="text-slate-700 text-sm mt-2 font-medium leading-relaxed" th:text="${riskRecord != null and riskRecord.failureReason != null ? riskRecord.failureReason : 'Your items are safely held in priority queue. Complete your transaction seamlessly below.'}">
+                    Your items are safely held in priority queue. Complete your transaction seamlessly below.
                 </p>
+            </div>
+
+            <!-- Promotional Privilege Banner (if 10% promo was attached on Stage 3) -->
+            <div th:if="${riskRecord != null and riskRecord.appliedPromoCode != null}" class="p-4 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-100 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">🎁</span>
+                    <div>
+                        <p class="text-xs font-bold text-emerald-900">VIP Win-back Discount Applied!</p>
+                        <p class="text-[11px] text-emerald-700 font-medium">Coupon <span class="font-mono font-bold text-emerald-900" th:text="${riskRecord.appliedPromoCode}">WINBACK10</span> saved you ₹<span th:text="${#numbers.formatDecimal(riskRecord.discountAmount, 1, 2)}">0.00</span></p>
+                    </div>
+                </div>
+                <span class="bg-emerald-600 text-white text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-full">10% OFF</span>
             </div>
 
             <!-- Order Summary & Timer Box -->
@@ -72,7 +84,7 @@
                         </div>
                         <div>
                             <span class="text-slate-600 font-medium">Customer:</span>
-                            <span class="font-bold text-slate-950 ml-1" th:text="${order != null ? order.customerName : 'Customer'}">Rudra</span>
+                            <span class="font-bold text-slate-950 ml-1" th:text="${order != null ? order.customerName : 'Customer'}">Customer</span>
                         </div>
                     </div>
                 </div>
@@ -96,7 +108,7 @@
 
             <!-- Subtle Security Trust Footer -->
             <div class="bg-slate-50 border-t border-slate-200 px-6 py-3 text-center text-xs text-slate-600 font-medium">
-                <span>🔒 Secured with 256-bit encryption by Razorpay</span>
+                <span>🔒 High-Availability Backup Route Secured by Razorpay</span>
             </div>
 
         </div>
@@ -151,7 +163,7 @@
             })
             .then(res => res.json())
             .then(rzpOrder => {
-                const keyId = (rzpOrder && rzpOrder.key_id && !rzpOrder.error) ? rzpOrder.key_id : "rzp_test_TVGefE9Hju6tLV";
+                const keyId = rzpOrder ? rzpOrder.key_id : null;
                 const orderId = (rzpOrder && rzpOrder.order_id && !rzpOrder.error) ? rzpOrder.order_id : null;
 
                 const options = {
@@ -218,7 +230,7 @@
                     btn.disabled = false;
                     btn.innerHTML = "<span>⚡ Retry Razorpay Payment</span>";
                     statusAlert.className = "p-4 rounded-xl text-center text-sm font-semibold bg-red-50 text-red-800 border border-red-200 block";
-                    statusAlert.innerText = "Unable to open payment modal. Please click direct payment link below.";
+                    statusAlert.innerText = "Unable to open payment modal. Please try again.";
                 }
             })
             .catch(err => {

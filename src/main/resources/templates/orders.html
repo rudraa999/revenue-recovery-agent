@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - The Arts Arcade</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50/50 min-h-screen flex flex-col justify-between text-gray-800">
+
+    <!-- Header Fragment -->
+    <div th:replace="~{fragments/header :: navbar}"></div>
+
+    <main class="flex-grow max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 pb-5 mb-6">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
+                    My Orders
+                </h1>
+                <p class="text-xs sm:text-sm text-gray-500 mt-1">Track, manage, and view receipts for your orders</p>
+            </div>
+
+            <!-- Search by Order Number -->
+            <form action="/orders" method="GET" class="flex items-center gap-2 max-w-sm w-full">
+                <div class="relative flex-grow">
+                    <input type="text" name="search" th:value="${searchQuery}" placeholder="Search by Order # or Email" class="w-full pl-9 pr-3 py-2 bg-white rounded-lg border border-gray-300 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none text-xs sm:text-sm">
+                    <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </div>
+                <button type="submit" class="px-3.5 py-2 bg-gray-900 hover:bg-black text-white text-xs font-semibold rounded-lg transition cursor-pointer">Search</button>
+            </form>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${orders == null or #lists.isEmpty(orders)}" class="bg-white rounded-xl p-10 text-center border border-gray-200 max-w-md mx-auto my-8">
+            <div class="w-14 h-14 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i class="fas fa-box-open text-xl"></i>
+            </div>
+            <h2 class="text-lg font-bold text-gray-900 mb-1">No Orders Placed Yet</h2>
+            <p class="text-gray-500 text-xs mb-5">You haven't placed any orders yet. Discover our handcrafted artworks today.</p>
+            <a href="/products" class="inline-flex items-center justify-center px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-medium rounded-lg text-xs transition-all shadow-sm">
+                Explore Art Collection
+            </a>
+        </div>
+
+        <!-- Compact Standard E-Commerce Order Cards List -->
+        <div th:unless="${orders == null or #lists.isEmpty(orders)}" class="space-y-4">
+            <div th:each="ord : ${orders}" class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden transition-all duration-200 hover:border-gray-300">
+                
+                <!-- Order Header (Amazon/Shopify Standard Row) -->
+                <div class="bg-gray-50/90 px-4 sm:px-6 py-3 border-b border-gray-200 flex flex-wrap items-center justify-between gap-y-2 gap-x-6 text-xs text-gray-600">
+                    <div class="flex flex-wrap items-center gap-x-6 gap-y-1">
+                        <div>
+                            <span class="text-gray-400 block text-[10px] uppercase font-bold tracking-wider">Order Placed</span>
+                            <span class="font-semibold text-gray-800" th:text="${ord.createdAt != null ? #temporals.format(ord.createdAt, 'dd MMM yyyy, hh:mm a') : 'Recently'}">30 Aug 2026</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400 block text-[10px] uppercase font-bold tracking-wider">Order Number</span>
+                            <span class="font-mono font-bold text-gray-900" th:text="${ord.orderNumber}">ORD-123456</span>
+                        </div>
+                        <div class="hidden md:block">
+                            <span class="text-gray-400 block text-[10px] uppercase font-bold tracking-wider">Customer</span>
+                            <span class="font-medium text-gray-800" th:text="${ord.customerName != null ? ord.customerName : 'Customer'}">Shruti Sharma</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <div class="text-right">
+                            <span class="text-gray-400 block text-[10px] uppercase font-bold tracking-wider">Total</span>
+                            <span class="font-bold text-gray-900 text-sm">₹<span th:text="${ord.totalAmount != null ? #numbers.formatDecimal(ord.totalAmount, 1, 2) : '0.00'}">0.00</span></span>
+                        </div>
+
+                        <!-- Status Badge -->
+                        <span th:if="${ord.status == 'PAID'}" class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold px-2.5 py-0.5 rounded-md">
+                            <i class="fas fa-check-circle text-[10px]"></i> Paid & Confirmed
+                        </span>
+                        <span th:if="${ord.status == 'DELIVERED'}" class="inline-flex items-center gap-1 bg-blue-50 text-blue-700 border border-blue-200 text-[11px] font-bold px-2.5 py-0.5 rounded-md">
+                            <i class="fas fa-truck text-[10px]"></i> Delivered
+                        </span>
+                        <span th:if="${ord.status == 'PAYMENT_FAILED'}" class="inline-flex items-center gap-1 bg-amber-50 text-amber-700 border border-amber-200 text-[11px] font-bold px-2.5 py-0.5 rounded-md">
+                            <i class="fas fa-exclamation-circle text-[10px]"></i> Payment Interrupted
+                        </span>
+                        <span th:if="${ord.status != 'PAID' and ord.status != 'DELIVERED' and ord.status != 'PAYMENT_FAILED'}" class="inline-flex items-center gap-1 bg-gray-100 text-gray-700 border border-gray-200 text-[11px] font-bold px-2.5 py-0.5 rounded-md" th:text="${ord.status}">
+                            Processing
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Coupon Discount Note (if applied) -->
+                <div th:if="${ord.promoCode != null and !#strings.isEmpty(ord.promoCode)}" class="px-4 sm:px-6 py-1.5 bg-emerald-50/50 border-b border-emerald-100 flex items-center justify-between text-[11px] text-emerald-800">
+                    <div class="flex items-center gap-1.5">
+                        <span>🏷️ Promo Code <strong class="font-mono uppercase" th:text="${ord.promoCode}">WELCOME10</strong> applied</span>
+                        <span th:if="${ord.discountAmount != null and ord.discountAmount > 0}" class="text-emerald-600">(Saved ₹<span th:text="${#numbers.formatDecimal(ord.discountAmount, 1, 2)}">0.00</span>)</span>
+                    </div>
+                    <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.2 rounded">Discounted</span>
+                </div>
+
+                <!-- Card Content: Items List & Actions -->
+                <div class="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    
+                    <!-- Left: Items -->
+                    <div class="flex-grow space-y-2.5 w-full sm:w-auto">
+                        <!-- Iterated Items (when items present in itemsJson) -->
+                        <div th:if="${orderItemsMap.get(ord.orderNumber) != null and !#lists.isEmpty(orderItemsMap.get(ord.orderNumber))}" class="space-y-2">
+                            <div th:each="item : ${orderItemsMap.get(ord.orderNumber)}" class="flex items-center gap-3">
+                                <img th:src="${item.imageUrl != null ? item.imageUrl : '/images/logo.jpeg'}" class="w-12 h-12 rounded-lg object-cover bg-gray-100 border border-gray-200 shrink-0">
+                                <div class="min-w-0">
+                                    <h4 class="text-xs font-bold text-gray-900 truncate" th:text="${item.name}">Art Piece</h4>
+                                    <p class="text-[11px] text-gray-500">Qty: <span class="font-semibold text-gray-700" th:text="${item.quantity}">1</span> • ₹<span th:text="${#numbers.formatDecimal(item.price, 1, 2)}">0.00</span> each</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fallback item representation if direct checkout without cart items -->
+                        <div th:if="${orderItemsMap.get(ord.orderNumber) == null or #lists.isEmpty(orderItemsMap.get(ord.orderNumber))}" class="flex items-center gap-3">
+                            <img src="/images/logo.jpeg" class="w-12 h-12 rounded-lg object-cover bg-gray-100 border border-gray-200 shrink-0">
+                            <div>
+                                <h4 class="text-xs font-bold text-gray-900">The Arts Arcade Handcrafted Artwork</h4>
+                                <p class="text-[11px] text-gray-500">Order Ref: <span class="font-mono font-medium text-gray-700" th:text="${ord.orderNumber}">ORD</span> • Payment via Razorpay</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Quick Actions -->
+                    <div class="flex flex-wrap sm:flex-col items-center sm:items-end gap-2 shrink-0 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100">
+                        <a href="/products" class="px-4 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-lg transition text-center w-full sm:w-auto">
+                            Buy Again
+                        </a>
+
+                        <!-- Resume link if unpaid -->
+                        <a th:if="${ord.status != 'PAID' and ord.status != 'DELIVERED'}" th:href="@{'/checkout/recovery/' + ${ord.orderNumber}}" class="px-4 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg transition text-center shadow-sm w-full sm:w-auto">
+                            ⚡ Complete Payment
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Subtle Bottom Info Strip -->
+                <div class="bg-gray-50/50 px-4 sm:px-6 py-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-400">
+                    <span>Recipient: <span class="text-gray-600 font-medium" th:text="${ord.customerName}">Name</span> (<span th:text="${ord.customerPhone}">Phone</span>)</span>
+                    <span th:if="${ord.razorpayPaymentId != null}" class="font-mono text-gray-400">ID: <span th:text="${ord.razorpayPaymentId}">pay_xxx</span></span>
+                </div>
+            </div>
+
+            <!-- Pagination Controls (Standard Industry UI) -->
+            <div th:if="${totalPages > 1}" class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white px-5 py-3.5 rounded-xl border border-gray-200 shadow-sm text-xs">
+                <div class="text-gray-500 font-medium">
+                    Showing Page <span class="font-bold text-gray-900" th:text="${currentPage + 1}">1</span> of <span class="font-bold text-gray-900" th:text="${totalPages}">1</span> (<span th:text="${totalItems}">0</span> total orders)
+                </div>
+
+                <div class="flex items-center gap-1.5">
+                    <!-- Prev Button -->
+                    <a th:if="${currentPage > 0}" th:href="@{/orders(page=${currentPage - 1}, search=${searchQuery})}" class="px-3 py-1.5 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-semibold transition cursor-pointer">
+                        &larr; Previous
+                    </a>
+                    <span th:unless="${currentPage > 0}" class="px-3 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-400 font-semibold cursor-not-allowed">
+                        &larr; Previous
+                    </span>
+
+                    <!-- Page Number Buttons -->
+                    <div class="flex items-center gap-1">
+                        <a th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
+                           th:href="@{/orders(page=${pageNum}, search=${searchQuery})}"
+                           th:text="${pageNum + 1}"
+                           th:class="${pageNum == currentPage ? 'px-3 py-1.5 rounded-lg bg-rose-600 text-white font-bold' : 'px-3 py-1.5 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-semibold transition'}">
+                           1
+                        </a>
+                    </div>
+
+                    <!-- Next Button -->
+                    <a th:if="${currentPage < totalPages - 1}" th:href="@{/orders(page=${currentPage + 1}, search=${searchQuery})}" class="px-3 py-1.5 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-semibold transition cursor-pointer">
+                        Next &rarr;
+                    </a>
+                    <span th:unless="${currentPage < totalPages - 1}" class="px-3 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-400 font-semibold cursor-not-allowed">
+                        Next &rarr;
+                    </span>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer Fragment -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+</html>

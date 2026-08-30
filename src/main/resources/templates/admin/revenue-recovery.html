@@ -110,12 +110,12 @@
                 <table class="w-full text-left border-collapse table-fixed">
                     <thead>
                         <tr class="bg-slate-950 text-slate-400 text-xs uppercase tracking-wider font-semibold border-b border-slate-800">
-                            <th class="py-3 px-4 w-[13%] whitespace-nowrap">Order</th>
+                            <th class="py-3 px-4 w-[12%] whitespace-nowrap">Order</th>
                             <th class="py-3 px-4 w-[13%] whitespace-nowrap">Customer</th>
                             <th class="py-3 px-4 w-[9%] whitespace-nowrap">Amount</th>
-                            <th class="py-3 px-4 w-[23%] whitespace-nowrap">Root Cause</th>
-                            <th class="py-3 px-4 w-[26%] whitespace-nowrap">Agent Actions Taken</th>
-                            <th class="py-3 px-4 pr-10 w-[16%] text-right whitespace-nowrap">Status</th>
+                            <th class="py-3 px-4 w-[22%] whitespace-nowrap">Root Cause</th>
+                            <th class="py-3 px-4 w-[30%] whitespace-nowrap">Agent Actions Taken</th>
+                            <th class="py-3 px-4 pr-10 w-[14%] text-right whitespace-nowrap">Status</th>
                         </tr>
                     </thead>
                     <tbody id="pipelineTableBody" class="divide-y divide-slate-800 text-sm">
@@ -131,54 +131,78 @@
                         <tr th:each="record : ${riskRecords}" class="pipeline-row hover:bg-slate-800/40 transition">
                             <td class="py-3.5 px-4 font-mono font-semibold text-white whitespace-nowrap align-middle" th:text="${record.orderNumber}">ORD-1234</td>
                             <td class="py-3.5 px-4 align-middle">
-                                <p class="font-medium text-slate-200 truncate" th:text="${record.customerName}">Shruti</p>
-                                <p class="text-xs text-slate-400 truncate" th:text="${record.customerPhone}">+91 9876543210</p>
+                                <p class="font-medium text-slate-200 truncate cursor-default" th:title="${record.customerName}" th:text="${record.customerName}">Shruti</p>
+                                <p class="text-xs text-slate-400 truncate cursor-default" th:title="${record.customerPhone}" th:text="${record.customerPhone}">+91 9876543210</p>
                             </td>
                             <td class="py-3.5 px-4 font-bold text-white text-base whitespace-nowrap align-middle">₹<span th:text="${record.amount != null ? #numbers.formatDecimal(record.amount, 1, 2) : '0.00'}">0.00</span></td>
                             <td class="py-3.5 px-4 align-middle">
-                                <p class="font-semibold text-slate-100 truncate" th:text="${record.failureReason != null and (#strings.contains(record.failureReason, 'Friction') or #strings.contains(record.failureReason, 'Dismissed')) ? 'Customer Checkout Abandonment' : (record.failureReason != null and #strings.contains(record.failureReason, 'Timeout') ? 'Bank Gateway Timeout' : (record.failureReason != null and #strings.contains(record.failureReason, 'Degradation') ? 'Bank Payment Processing Issue' : (record.failureReason != null ? record.failureReason : 'Customer Checkout Abandonment')))}">Customer Checkout Abandonment</p>
+                                <p class="font-semibold text-slate-100 truncate cursor-default"
+                                   th:title="${record.failureReason != null ? record.failureReason : 'Customer Checkout Session Interrupted'}"
+                                   th:text="${record.failureReason != null ? record.failureReason : 'Customer Checkout Session Interrupted'}">Bank Gateway Timeout</p>
+                                <p class="text-xs text-slate-400 font-mono cursor-default"
+                                   th:title="${record.failureCode != null ? record.failureCode : 'CHECKOUT_DISMISSED'}"
+                                   th:text="${record.failureCode != null ? record.failureCode : 'CHECKOUT_DISMISSED'}">GATEWAY_TIMEOUT</p>
                             </td>
                             <td class="py-3.5 px-4 align-middle">
-                                <!-- When Recovered -->
-                                <div th:if="${record.status == 'RECOVERED'}" class="space-y-0.5">
-                                    <p class="text-xs text-emerald-400 font-medium flex items-center gap-1.5 truncate">
-                                        <span>✓</span>
-                                        <span th:if="${record.failureReason != null and #strings.contains(record.failureReason, 'Timeout')}">Rerouted via backup gateway; recovered</span>
-                                        <span th:unless="${record.failureReason != null and #strings.contains(record.failureReason, 'Timeout')}">Dispatched instant link; recovered</span>
+                                <div class="space-y-1">
+                                    <!-- Primary Action Description with Hover Tooltip -->
+                                    <p class="text-xs font-semibold text-slate-100 truncate cursor-default"
+                                       th:title="${record.actionTaken != null ? record.actionTaken : (record.failureReason != null and #strings.contains(record.failureReason, 'UPI') ? 'Dispatched 1-click UPI Intent link & QR route' : (record.failureReason != null and #strings.contains(record.failureReason, 'Timeout') ? 'Rerouted transaction via high-availability backup gateway' : 'Generated 1-click Razorpay instant recovery route'))}"
+                                       th:text="${record.actionTaken != null ? record.actionTaken : (record.failureReason != null and #strings.contains(record.failureReason, 'UPI') ? 'Dispatched 1-click UPI Intent link & QR route' : (record.failureReason != null and #strings.contains(record.failureReason, 'Timeout') ? 'Rerouted transaction via high-availability backup gateway' : 'Generated 1-click Razorpay instant recovery route'))}">
+                                        Generated 1-click Razorpay instant recovery route
                                     </p>
-                                    <p class="text-[11px] text-slate-500 truncate">Autonomous workflow completed</p>
-                                </div>
 
-                                <!-- When Reminder Sent -->
-                                <div th:if="${record.status == 'REMINDER_SENT'}" class="space-y-0.5">
-                                    <p class="text-xs text-indigo-300 font-medium truncate">Dispatched reminder link</p>
-                                    <p class="text-[11px] text-slate-400 truncate">Awaiting customer payment completion</p>
-                                </div>
+                                    <!-- Secondary Contextual Badge/Text with Hover Tooltip -->
+                                    <div class="flex items-center gap-1.5 text-[11px] truncate">
+                                        <!-- Recovered -->
+                                        <span th:if="${record.status == 'RECOVERED'}"
+                                              title="Payment successfully recovered via automated instant recovery route"
+                                              class="text-emerald-400 font-medium flex items-center gap-1 cursor-default">
+                                            <span>✓</span> Revenue recovered • Saved ₹<span th:text="${record.amount != null ? #numbers.formatDecimal(record.amount, 1, 2) : '0.00'}">0.00</span>
+                                        </span>
 
-                                <!-- When In Progress (Recovering / At Risk) -->
-                                <div th:if="${record.status == 'RECOVERING' or record.status == 'AT_RISK'}" class="space-y-0.5">
-                                    <p class="text-xs text-slate-200 font-medium truncate">
-                                        <span th:if="${record.failureReason != null and #strings.contains(record.failureReason, 'Timeout')}">Diagnosed bank outage & routed backup</span>
-                                        <span th:unless="${record.failureReason != null and #strings.contains(record.failureReason, 'Timeout')}">Generated 1-click instant recovery link</span>
-                                    </p>
-                                    <p class="text-[11px] text-slate-400 truncate">Next: Automated reminder if unpaid</p>
-                                </div>
+                                        <!-- Stopped by cross-order rule (Without thunder emoji) -->
+                                        <span th:if="${record.status == 'STOPPED'}"
+                                              title="Stopping rule satisfied: Customer completed alternative purchase"
+                                              class="text-amber-400 font-medium flex items-center gap-1 cursor-default">
+                                            <span>Stopping rule satisfied • Completed alternative purchase</span>
+                                        </span>
 
-                                <!-- When Escalated -->
-                                <div th:if="${record.status == 'ESCALATED'}" class="space-y-0.5">
-                                    <p class="text-xs text-rose-400 font-medium truncate">Max retries reached</p>
-                                    <p class="text-[11px] text-slate-400 truncate">Escalated to human support</p>
+                                        <!-- Cadence Reminder Sent -->
+                                        <span th:if="${record.status == 'REMINDER_SENT' or record.status == 'FINAL_REMINDER_SENT'}"
+                                              th:title="${'Automated follow-up reminder Stage ' + record.cadenceStage + ' active'}"
+                                              class="text-indigo-300 font-medium flex items-center gap-1 cursor-default">
+                                            <span th:text="${'Cadence Stage ' + record.cadenceStage + ' active'}">Stage 1 active</span>
+                                            <span th:if="${record.appliedPromoCode != null}" class="text-emerald-400 font-bold" th:text="${'• Coupon: ' + record.appliedPromoCode}">• Coupon: WINBACK10</span>
+                                        </span>
+
+                                        <!-- Escalated -->
+                                        <span th:if="${record.status == 'ESCALATED'}"
+                                              title="Max cadence retries reached; Escalated to VIP human support desk"
+                                              class="text-rose-400 font-medium cursor-default">
+                                            Max retries reached • Escalated to VIP Desk
+                                        </span>
+
+                                        <!-- In Progress / At Risk / Default -->
+                                        <span th:if="${record.status != 'RECOVERED' and record.status != 'STOPPED' and record.status != 'REMINDER_SENT' and record.status != 'FINAL_REMINDER_SENT' and record.status != 'ESCALATED'}"
+                                              title="Stage 0 initial failure intervention live; 3-hour cadence scheduled"
+                                              class="text-slate-400 font-medium cursor-default">
+                                            Stage 0 live route • Next: 3-hr cadence follow-up
+                                        </span>
+                                    </div>
                                 </div>
                             </td>
                             <td class="py-3.5 px-4 pr-10 text-right whitespace-nowrap align-middle">
                                 <div class="inline-flex items-center justify-end gap-2">
                                     <span th:if="${record.status == 'RECOVERED'}" class="bg-emerald-500/10 text-emerald-400 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-emerald-500/20">Recovered</span>
+                                    <span th:if="${record.status == 'STOPPED'}" class="bg-amber-500/10 text-amber-400 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-amber-500/20">Stopped</span>
                                     <span th:if="${record.status == 'REMINDER_SENT'}" class="bg-indigo-500/10 text-indigo-400 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-indigo-500/20">Reminder Sent</span>
+                                    <span th:if="${record.status == 'FINAL_REMINDER_SENT'}" class="bg-orange-500/10 text-orange-400 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-orange-500/20">Final Reminder</span>
                                     <span th:if="${record.status == 'RECOVERING'}" class="bg-blue-500/10 text-blue-400 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-blue-500/20">Recovering</span>
                                     <span th:if="${record.status == 'AT_RISK'}" class="bg-slate-700/50 text-slate-300 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-slate-600/50">At Risk</span>
                                     <span th:if="${record.status == 'ESCALATED'}" class="bg-rose-500/10 text-rose-400 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-rose-500/20">Escalated</span>
 
-                                    <button th:if="${record.status != 'RECOVERED'}" type="button" th:attr="data-order=${record.orderNumber}" onclick="simulateSuccess(this.getAttribute('data-order'))" title="Simulate payment success for demo" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-emerald-400 px-2 py-0.5 rounded border border-slate-700 transition cursor-pointer">
+                                    <button th:if="${record.status != 'RECOVERED' and record.status != 'STOPPED'}" type="button" th:attr="data-order=${record.orderNumber}" onclick="simulateSuccess(this.getAttribute('data-order'))" title="Simulate payment success for demo" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-emerald-400 px-2 py-0.5 rounded border border-slate-700 transition cursor-pointer">
                                         Simulate
                                     </button>
                                 </div>

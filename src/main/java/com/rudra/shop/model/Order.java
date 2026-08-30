@@ -25,6 +25,9 @@ public class Order {
     private String customerPhone;
 
     private Double totalAmount;
+    private Double originalAmount;
+    private Double discountAmount = 0.0;
+    private String promoCode;
 
     @Column(nullable = false)
     private String status = "PENDING_PAYMENT"; // PENDING_PAYMENT, PAYMENT_FAILED, RECOVERING, RECOVERED, PAID, CANCELLED

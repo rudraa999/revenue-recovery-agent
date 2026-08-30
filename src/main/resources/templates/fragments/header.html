@@ -77,6 +77,30 @@
 
 
 
+                <!-- Notification Bell & Dropdown -->
+                <div class="relative flex items-center -mr-2" id="notificationContainer">
+                    <button id="notificationBtn" class="relative text-gray-700 hover:text-rose-600 font-medium transition duration-150 p-1 rounded-full hover:bg-gray-100 focus:outline-none cursor-pointer" aria-label="Notifications">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        <span id="notifBadge" class="hidden absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center animate-pulse">0</span>
+                    </button>
+
+                    <!-- Notifications Dropdown Menu -->
+                    <div id="notificationDropdown" class="hidden absolute right-0 top-10 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 py-3 z-50 transition-all duration-200">
+                        <div class="px-4 pb-2 border-b border-gray-100 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-gray-800 text-sm">Notifications & Offers</span>
+                                <span id="notifCountTag" class="bg-rose-50 text-rose-600 text-xs px-2 py-0.5 rounded-full font-semibold">0 New</span>
+                            </div>
+                            <button onclick="markAllNotificationsRead()" class="text-[11px] text-gray-500 hover:text-rose-600 font-medium">Mark all read</button>
+                        </div>
+                        <div id="notificationList" class="max-h-72 overflow-y-auto divide-y divide-gray-50">
+                            <div class="py-6 text-center text-xs text-gray-400">No new notifications</div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Authenticated: Account Dropdown -->
                 <div th:if="${#authorization.expression('isAuthenticated()')}" class="relative group flex items-center">
                     <button
@@ -95,6 +119,9 @@
                             <a href="/account-dashboard"
                                 class="px-4 py-2 text-sm text-gray-700 hover:bg-rose-50 hover:text-rose-600">Account
                                 Dashboard</a>
+
+                            <a href="/orders"
+                                class="px-4 py-2 text-sm text-gray-700 hover:bg-rose-50 hover:text-rose-600">My Orders</a>
 
                             <a href="/contact"
                                 class="px-4 py-2 text-sm text-gray-700 hover:bg-rose-50 hover:text-rose-600">
@@ -174,6 +201,10 @@
             <a th:if="${#authorization.expression('isAuthenticated()')}" href="/account-dashboard"
                 class="block px-6 py-4 border-b border-gray-50 text-base font-medium text-gray-900 hover:bg-rose-50 hover:text-rose-600">Account
                 Dashboard</a>
+
+            <!-- My Orders -->
+            <a href="/orders"
+                class="block px-6 py-4 border-b border-gray-50 text-base font-medium text-gray-900 hover:bg-rose-50 hover:text-rose-600">My Orders</a>
 
             <!-- Wishlist -->
             <a href="/wishlist"
@@ -302,44 +333,81 @@
 
 
 
-        function toggleWishlist(productId, buttonElement) {
-            fetch('/wishlist/toggle?productId=' + productId, {
-                method: 'POST'
-            })
-                .then(response => {
-                    if (response.status === 401) {
-                        window.location.href = '/login';
-                        return null;
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data && data.success) {
-                        updateWishlistBadge(data.count);
+        // Notifications Handling
+        const notifBtn = document.getElementById('notificationBtn');
+        const notifDropdown = document.getElementById('notificationDropdown');
+        const notifBadge = document.getElementById('notifBadge');
+        const notifCountTag = document.getElementById('notifCountTag');
+        const notifList = document.getElementById('notificationList');
 
-                        const svg = buttonElement.querySelector('svg');
-                        if (data.isAdded) {
-                            buttonElement.classList.add('text-rose-500', 'bg-rose-50', 'border-rose-300');
-                            buttonElement.classList.remove('text-gray-400');
-                            svg.setAttribute('fill', 'currentColor');
-                        } else {
-                            buttonElement.classList.remove('text-rose-500', 'bg-rose-50', 'border-rose-300');
-                            buttonElement.classList.add('text-gray-400');
-                            svg.setAttribute('fill', 'none');
+        if (notifBtn && notifDropdown) {
+            notifBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                notifDropdown.classList.toggle('hidden');
+                loadNotifications();
+            });
 
-                            if (window.location.pathname === '/wishlist') {
-                                const card = document.getElementById('wishlist-item-' + productId);
-                                if (card) {
-                                    card.remove();
-                                    if (data.count === 0) {
-                                        window.location.reload();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                })
-                .catch(error => console.error('Error toggling wishlist:', error));
+            document.addEventListener('click', (e) => {
+                if (!notifDropdown.contains(e.target) && !notifBtn.contains(e.target)) {
+                    notifDropdown.classList.add('hidden');
+                }
+            });
         }
+
+        function loadNotifications() {
+            fetch('/api/notifications')
+                .then(r => r.json())
+                .then(data => {
+                    const count = data.unreadCount || 0;
+                    if (count > 0) {
+                        notifBadge.textContent = count;
+                        notifBadge.classList.remove('hidden');
+                        notifCountTag.textContent = count + ' New';
+                    } else {
+                        notifBadge.classList.add('hidden');
+                        notifCountTag.textContent = 'All caught up';
+                    }
+
+                    if (data.notifications && data.notifications.length > 0) {
+                        notifList.innerHTML = data.notifications.map(n => `
+                            <div onclick="handleNotificationClick(${n.id}, '${n.actionUrl}')" class="p-3 hover:bg-rose-50/50 cursor-pointer transition flex items-start gap-3 ${!n.read ? 'bg-rose-50/20' : ''}">
+                                <div class="w-8 h-8 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shrink-0 mt-0.5">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center justify-between">
+                                        <h4 class="text-xs font-bold text-gray-900 truncate">${n.title}</h4>
+                                        <span class="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.2 rounded font-semibold">${n.badgeText || 'Offer'}</span>
+                                    </div>
+                                    <p class="text-[11px] text-gray-600 mt-0.5 line-clamp-2 leading-relaxed">${n.message}</p>
+                                    <span class="text-[10px] text-rose-600 font-semibold mt-1 inline-block hover:underline">Claim Offer &rarr;</span>
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        notifList.innerHTML = '<div class="py-6 text-center text-xs text-gray-400">No new notifications</div>';
+                    }
+                })
+                .catch(e => console.error('Error fetching notifications:', e));
+        }
+
+        function handleNotificationClick(id, url) {
+            fetch('/api/notifications/mark-read/' + id, { method: 'POST' })
+                .then(() => {
+                    if (url) window.location.href = url;
+                });
+        }
+
+        function markAllNotificationsRead() {
+            fetch('/api/notifications/mark-all-read', { method: 'POST' })
+                .then(() => {
+                    loadNotifications();
+                });
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadNotifications();
+        });
     </script>
 </nav>
