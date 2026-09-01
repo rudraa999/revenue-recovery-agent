@@ -34,6 +34,13 @@
         .pulse-beacon {
             animation: pulse-glow 2s infinite ease-in-out;
         }
+        @keyframes highlight-flash {
+            0% { background-color: rgba(99, 102, 241, 0.3); border-color: rgba(99, 102, 241, 0.8); }
+            100% { background-color: transparent; }
+        }
+        .row-highlight {
+            animation: highlight-flash 3s ease-out;
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
@@ -67,7 +74,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                 </svg>
-                <span>Simulation Lab</span>
+                <span>⚡ Simulation Lab</span>
             </button>
 
             <!-- Export CSV Button -->
@@ -112,7 +119,7 @@
                         <span class="text-[11px] font-normal text-slate-400 bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700">Senior Analyst Model</span>
                     </h2>
                     <p class="text-xs text-slate-400 mt-0.5">
-                        The autonomous finance agent has diagnosed <strong class="text-slate-200" th:text="${totalCount}">42</strong> interrupted checkouts and converted <strong class="text-emerald-400 font-semibold">₹<span th:text="${totalRecovered}">0.00</span></strong> into settled bank revenue.
+                        The autonomous finance agent has diagnosed <strong class="text-slate-200" id="headerTotalCount" th:text="${totalCount}">42</strong> interrupted checkouts and converted <strong class="text-emerald-400 font-semibold">₹<span id="headerTotalRecovered" th:text="${totalRecovered}">0.00</span></strong> into settled bank revenue.
                     </p>
                 </div>
             </div>
@@ -120,7 +127,7 @@
                 <div class="text-right">
                     <p class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Realized Value Ratio</p>
                     <p class="text-base font-extrabold text-emerald-400">
-                        <span th:text="${pipelineSavedPercentage != null ? pipelineSavedPercentage : '80.9'}">80.9</span>% of Pipeline
+                        <span id="headerPipelineSavedPercentage" th:text="${pipelineSavedPercentage != null ? pipelineSavedPercentage : '80.9'}">80.9</span>% of Pipeline
                     </p>
                 </div>
             </div>
@@ -139,12 +146,12 @@
                     </span>
                 </div>
                 <div>
-                    <h3 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">₹<span th:text="${totalAtRisk}">0.00</span></h3>
+                    <h3 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">₹<span id="kpiTotalAtRisk" th:text="${totalAtRisk}">0.00</span></h3>
                     <p class="text-xs text-slate-400 mt-1">Interrupted cart volume ingested</p>
                 </div>
                 <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
-                    <span>Active In Flight: <strong class="text-amber-300 font-semibold" th:text="${activeCount != null ? activeCount : pendingCount}">10</strong></span>
-                    <span>Total Cases: <strong class="text-slate-200" th:text="${totalCount}">42</strong></span>
+                    <span>Active In Flight: <strong class="text-amber-300 font-semibold" id="kpiActiveCount" th:text="${activeCount != null ? activeCount : pendingCount}">10</strong></span>
+                    <span>Total Cases: <strong class="text-slate-200" id="kpiTotalCount" th:text="${totalCount}">42</strong></span>
                 </div>
             </div>
 
@@ -157,12 +164,12 @@
                     </span>
                 </div>
                 <div>
-                    <h3 class="text-2xl sm:text-3xl font-extrabold text-emerald-400 tracking-tight">₹<span th:text="${totalRecovered}">0.00</span></h3>
+                    <h3 class="text-2xl sm:text-3xl font-extrabold text-emerald-400 tracking-tight">₹<span id="kpiTotalRecovered" th:text="${totalRecovered}">0.00</span></h3>
                     <p class="text-xs text-slate-400 mt-1">Saved via 1-click fallback links</p>
                 </div>
                 <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
                     <span>Avg Recovered Cart:</span>
-                    <span class="font-bold text-slate-200">₹<span th:text="${avgRecoveredAmount != null ? avgRecoveredAmount : '536.00'}">536.00</span></span>
+                    <span class="font-bold text-slate-200">₹<span id="kpiAvgRecovered" th:text="${avgRecoveredAmount != null ? avgRecoveredAmount : '536.00'}">536.00</span></span>
                 </div>
             </div>
 
@@ -176,11 +183,11 @@
                 </div>
                 <div>
                     <div class="flex items-baseline justify-between">
-                        <h3 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight"><span th:text="${recoveryRate}">0.0</span>%</h3>
-                        <span class="text-xs text-slate-400" th:text="${recoveredCount + ' of ' + totalCount + ' Won'}">26 of 42 Won</span>
+                        <h3 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight"><span id="kpiRecoveryRate" th:text="${recoveryRate}">0.0</span>%</h3>
+                        <span class="text-xs text-slate-400" id="kpiRecoveredRatio" th:text="${recoveredCount + ' of ' + totalCount + ' Won'}">26 of 42 Won</span>
                     </div>
                     <div class="w-full bg-slate-800 h-2 rounded-full mt-2.5 overflow-hidden">
-                        <div class="bg-gradient-to-r from-indigo-500 to-emerald-400 h-full rounded-full transition-all duration-700" th:style="'width: ' + ${recoveryRate} + '%'"></div>
+                        <div id="kpiProgressBar" class="bg-gradient-to-r from-indigo-500 to-emerald-400 h-full rounded-full transition-all duration-700" th:style="'width: ' + ${recoveryRate} + '%'"></div>
                     </div>
                 </div>
                 <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
@@ -200,12 +207,12 @@
                 <div>
                     <div class="flex items-baseline justify-between">
                         <h3 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">100%</h3>
-                        <span class="text-xs text-amber-400 font-semibold" th:text="${(stoppedCount != null ? stoppedCount : 4) + ' Safely Stopped'}">4 Safely Stopped</span>
+                        <span class="text-xs text-amber-400 font-semibold" id="kpiStoppedCount" th:text="${(stoppedCount != null ? stoppedCount : 4) + ' Safely Stopped'}">4 Safely Stopped</span>
                     </div>
                     <p class="text-xs text-slate-400 mt-1">Cross-order purchase detection</p>
                 </div>
                 <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
-                    <span>VIP Escalations: <strong class="text-rose-400" th:text="${escalatedCount != null ? escalatedCount : 2}">2</strong></span>
+                    <span>VIP Escalations: <strong class="text-rose-400" id="kpiEscalatedCount" th:text="${escalatedCount != null ? escalatedCount : 2}">2</strong></span>
                     <span class="text-emerald-400">0% Customer Spam</span>
                 </div>
             </div>
@@ -225,7 +232,7 @@
                         </h3>
                         <span class="text-[11px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">Click slice to filter</span>
                     </div>
-                    <p class="text-xs text-slate-400 mb-4">Autonomous classification of payment failures & checkout interruptions</p>
+                    <p class="text-xs text-slate-400 mb-4">Autonomous classification of payment failures</p>
                     
                     <div class="relative h-48 sm:h-52 flex items-center justify-center">
                         <canvas id="rootCauseChart"></canvas>
@@ -247,7 +254,7 @@
                         </h3>
                         <span class="text-[11px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 font-semibold">High Conversion</span>
                     </div>
-                    <p class="text-xs text-slate-400 mb-4">Customer recovery rate across 0-hr instant, 5-min SMS, 3-hr hold, and 6-hr VIP coupon stages</p>
+                    <p class="text-xs text-slate-400 mb-4">Recovery rate across cadence progression stages</p>
 
                     <div class="relative h-48 sm:h-52">
                         <canvas id="cadenceFunnelChart"></canvas>
@@ -287,7 +294,7 @@
                             Finance Agent Interventions & Risk Pipeline
                             <span id="activeFilterBadge" class="hidden text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full font-medium">Filtered</span>
                         </h3>
-                        <p class="text-xs text-slate-400">Live view of payment failures, automated diagnoses, recovery routes, and customer case files</p>
+                        <p class="text-xs text-slate-400">Live view of payment failures and automated interventions</p>
                     </div>
 
                     <!-- Non-Technical Quick Search -->
@@ -302,7 +309,7 @@
 
                         <!-- Sort Dropdown -->
                         <select id="sortSelect" onchange="applyFilters()" class="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-500 cursor-pointer">
-                            <option value="newest">Newest First</option>
+                            <option value="newest" selected>Newest First</option>
                             <option value="amount-high">Amount: High to Low</option>
                             <option value="amount-low">Amount: Low to High</option>
                             <option value="oldest">Oldest First</option>
@@ -314,19 +321,19 @@
                 <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
                     <div class="flex flex-wrap items-center gap-1.5" id="statusFilterTabs">
                         <button type="button" onclick="setStatusFilter('ALL')" data-filter="ALL" class="filter-tab-btn active px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white border border-indigo-500 transition cursor-pointer shadow">
-                            All Records (<span th:text="${totalCount}">42</span>)
+                            All Records (<span id="tabCountAll" th:text="${totalCount}">42</span>)
                         </button>
                         <button type="button" onclick="setStatusFilter('RECOVERED')" data-filter="RECOVERED" class="filter-tab-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:text-white border border-slate-700 transition cursor-pointer">
-                            Won Back (<span th:text="${recoveredCount}">26</span>)
+                            Won Back (<span id="tabCountRecovered" th:text="${recoveredCount}">26</span>)
                         </button>
                         <button type="button" onclick="setStatusFilter('ACTIVE')" data-filter="ACTIVE" class="filter-tab-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:text-white border border-slate-700 transition cursor-pointer">
-                            In Pipeline (<span th:text="${activeCount != null ? activeCount : pendingCount}">10</span>)
+                            In Pipeline (<span id="tabCountActive" th:text="${activeCount != null ? activeCount : pendingCount}">10</span>)
                         </button>
                         <button type="button" onclick="setStatusFilter('STOPPED')" data-filter="STOPPED" class="filter-tab-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:text-white border border-slate-700 transition cursor-pointer">
-                            Safely Stopped (<span th:text="${stoppedCount != null ? stoppedCount : 4}">4</span>)
+                            Safely Stopped (<span id="tabCountStopped" th:text="${stoppedCount != null ? stoppedCount : 4}">4</span>)
                         </button>
                         <button type="button" onclick="setStatusFilter('ESCALATED')" data-filter="ESCALATED" class="filter-tab-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:text-white border border-slate-700 transition cursor-pointer">
-                            Escalated (<span th:text="${escalatedCount != null ? escalatedCount : 2}">2</span>)
+                            Escalated (<span id="tabCountEscalated" th:text="${escalatedCount != null ? escalatedCount : 2}">2</span>)
                         </button>
                     </div>
 
@@ -357,126 +364,7 @@
                         </tr>
                     </thead>
                     <tbody id="pipelineTableBody" class="divide-y divide-slate-800 text-sm">
-                        <!-- Server-Rendered fallback rows (Enhanced by client-side reactivity) -->
-                        <tr th:if="${riskRecords == null || riskRecords.isEmpty()}" id="noRecordsRow">
-                            <td colspan="6" class="py-16 text-center text-slate-500 text-sm">
-                                <div class="w-14 h-14 bg-slate-800 text-slate-400 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-inner">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                </div>
-                                <p class="font-semibold text-slate-200">No payment failures recorded</p>
-                                <p class="text-xs text-slate-500 mt-1">Interrupted transactions and automatic interventions will log here in real-time.</p>
-                            </td>
-                        </tr>
-
-                        <tr th:each="record : ${riskRecords}" 
-                            class="pipeline-row hover:bg-slate-800/50 transition cursor-pointer"
-                            th:attr="data-order=${record.orderNumber}, data-customer=${record.customerName}, data-phone=${record.customerPhone}, data-email=${record.customerEmail}, data-amount=${record.amount}, data-status=${record.status}, data-reason=${record.failureReason}, data-code=${record.failureCode}, data-stage=${record.cadenceStage}, data-action=${record.actionTaken}, data-promo=${record.appliedPromoCode}, data-link=${record.recoveryLink}"
-                            onclick="openCaseModal(this)">
-                            
-                            <!-- Order ID with 1-click copy -->
-                            <td class="py-4 px-4 font-mono font-bold text-white whitespace-nowrap align-middle">
-                                <div class="flex items-center gap-1.5 group">
-                                    <span class="text-indigo-300 group-hover:text-indigo-200 transition" th:text="${record.orderNumber}">ORD-1234</span>
-                                    <button type="button" onclick="event.stopPropagation(); copyText('${record.orderNumber}', 'Order ID copied!')" class="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-white transition p-1" title="Copy Order ID">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </td>
-
-                            <!-- Customer Info with Avatar -->
-                            <td class="py-4 px-4 align-middle">
-                                <div class="flex items-center gap-2.5">
-                                    <div class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-indigo-300 shrink-0" th:text="${record.customerName != null && !record.customerName.isEmpty() ? #strings.substring(record.customerName, 0, 1) : 'C'}">
-                                        C
-                                    </div>
-                                    <div class="min-w-0">
-                                        <p class="font-semibold text-slate-200 truncate" th:text="${record.customerName != null ? record.customerName : 'Customer'}">Shruti Sharma</p>
-                                        <p class="text-xs text-slate-400 truncate" th:text="${record.customerPhone != null ? record.customerPhone : '+91 9876543210'}">+91 9876543210</p>
-                                    </div>
-                                </div>
-                            </td>
-
-                            <!-- Amount with high-value tag -->
-                            <td class="py-4 px-4 font-bold text-white text-base whitespace-nowrap align-middle">
-                                <div>
-                                    <span>₹<span th:text="${record.amount != null ? #numbers.formatDecimal(record.amount, 1, 2) : '0.00'}">0.00</span></span>
-                                    <span th:if="${record.amount != null and record.amount >= 5000}" class="block text-[10px] font-bold text-amber-400 uppercase tracking-tight">★ High Value</span>
-                                </div>
-                            </td>
-
-                            <!-- Diagnosis & Reason -->
-                            <td class="py-4 px-4 align-middle">
-                                <div class="space-y-0.5">
-                                    <p class="font-semibold text-slate-100 text-xs truncate"
-                                       th:title="${record.failureReason != null ? record.failureReason : 'Customer Checkout Session Interrupted'}"
-                                       th:text="${record.failureReason != null ? record.failureReason : 'Customer Checkout Session Interrupted'}">Bank Gateway Timeout</p>
-                                    <span class="inline-block text-[10px] font-mono text-slate-400 bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800"
-                                          th:text="${record.failureCode != null ? record.failureCode : 'CHECKOUT_DISMISSED'}">GATEWAY_TIMEOUT</span>
-                                </div>
-                            </td>
-
-                            <!-- Action Taken & Promo Attached -->
-                            <td class="py-4 px-4 align-middle">
-                                <div class="space-y-1">
-                                    <p class="text-xs font-semibold text-slate-200 line-clamp-1"
-                                       th:title="${record.actionTaken != null ? record.actionTaken : 'Dispatched 1-click smart recovery route'}"
-                                       th:text="${record.actionTaken != null ? record.actionTaken : 'Dispatched 1-click smart recovery route'}">
-                                        Dispatched 1-click smart recovery route
-                                    </p>
-                                    <div class="flex items-center gap-2 text-[11px]">
-                                        <!-- Recovered badge -->
-                                        <span th:if="${record.status == 'RECOVERED'}" class="text-emerald-400 font-medium flex items-center gap-1">
-                                            <span>✓ Won Back</span>
-                                        </span>
-                                        <!-- Stopped badge -->
-                                        <span th:if="${record.status == 'STOPPED'}" class="text-amber-400 font-medium flex items-center gap-1">
-                                            <span>Stopping Rule Satisfied</span>
-                                        </span>
-                                        <!-- Cadence Stage badge -->
-                                        <span th:if="${record.status == 'REMINDER_SENT' or record.status == 'FINAL_REMINDER_SENT'}" class="text-indigo-300 font-medium">
-                                            <span th:text="${'Stage ' + record.cadenceStage + ' Active'}">Stage 1 Active</span>
-                                        </span>
-                                        <!-- Promo code attached -->
-                                        <span th:if="${record.appliedPromoCode != null}" class="bg-emerald-500/10 text-emerald-400 font-bold px-1.5 py-0.2 rounded border border-emerald-500/20 text-[10px]" th:text="${'Coupon: ' + record.appliedPromoCode}">Coupon: WINBACK10</span>
-                                    </div>
-                                </div>
-                            </td>
-
-                            <!-- Status Badge & 1-Click Operational Action -->
-                            <td class="py-4 px-4 pr-6 text-right whitespace-nowrap align-middle">
-                                <div class="inline-flex items-center justify-end gap-2" onclick="event.stopPropagation()">
-                                    <!-- Status Badge -->
-                                    <span th:if="${record.status == 'RECOVERED'}" class="bg-emerald-500/15 text-emerald-400 text-xs font-bold px-2.5 py-1 rounded-full border border-emerald-500/30">Won Back</span>
-                                    <span th:if="${record.status == 'STOPPED'}" class="bg-amber-500/15 text-amber-400 text-xs font-bold px-2.5 py-1 rounded-full border border-amber-500/30">Stopped</span>
-                                    <span th:if="${record.status == 'REMINDER_SENT'}" class="bg-indigo-500/15 text-indigo-400 text-xs font-bold px-2.5 py-1 rounded-full border border-indigo-500/30">Reminder Sent</span>
-                                    <span th:if="${record.status == 'FINAL_REMINDER_SENT'}" class="bg-orange-500/15 text-orange-400 text-xs font-bold px-2.5 py-1 rounded-full border border-orange-500/30">Final Notice</span>
-                                    <span th:if="${record.status == 'RECOVERING' or record.status == 'AT_RISK'}" class="bg-blue-500/15 text-blue-400 text-xs font-bold px-2.5 py-1 rounded-full border border-blue-500/30">In Pipeline</span>
-                                    <span th:if="${record.status == 'ESCALATED'}" class="bg-rose-500/15 text-rose-400 text-xs font-bold px-2.5 py-1 rounded-full border border-rose-500/30">Escalated</span>
-
-                                    <!-- Quick 1-Click Action Buttons -->
-                                    <button th:if="${record.status != 'RECOVERED' and record.status != 'STOPPED'}" 
-                                            type="button" 
-                                            th:attr="data-order=${record.orderNumber}" 
-                                            onclick="simulateSuccess(this.getAttribute('data-order'))" 
-                                            title="Simulate customer completing payment" 
-                                            class="text-[11px] font-semibold bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white px-2.5 py-1 rounded-lg border border-emerald-500/30 transition cursor-pointer">
-                                        Won Back
-                                    </button>
-
-                                    <!-- Case File Open Button -->
-                                    <button type="button" 
-                                            onclick="openCaseModalFromBtn(this)" 
-                                            title="Open full diagnostic case file" 
-                                            class="text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-2.5 py-1 rounded-lg border border-slate-700 transition cursor-pointer">
-                                        Case File
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
+                        <!-- Rendered dynamically by JavaScript with smooth transitions -->
                     </tbody>
                 </table>
             </div>
@@ -519,21 +407,14 @@
                 <!-- Ledger Search and Category Filter -->
                 <div class="flex items-center gap-2">
                     <input type="text" id="auditSearchInput" oninput="filterAuditLogs()" placeholder="Search audit logs..." class="bg-slate-950 border border-slate-800 text-xs rounded-xl px-3 py-1.5 text-slate-300 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
-                    <button type="button" onclick="refreshAuditLogs()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-xl border border-slate-700 transition cursor-pointer" title="Refresh Logs">
+                    <button type="button" onclick="loadDashboardData()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-xl border border-slate-700 transition cursor-pointer" title="Refresh Logs">
                         ↻ Refresh
                     </button>
                 </div>
             </div>
             
             <div id="auditLogList" class="bg-slate-950 p-4 rounded-xl border border-slate-800/80 max-h-80 overflow-y-auto font-mono text-xs space-y-2.5 custom-scrollbar">
-                <div th:if="${auditLogs == null || auditLogs.isEmpty()}" class="text-slate-600 text-center py-6">
-                    Audit ledger is empty. Agent actions will log here step-by-step.
-                </div>
-                <div th:each="log : ${auditLogs}" class="audit-log-item flex items-start gap-3 pb-2.5 border-b border-slate-900" th:attr="data-text=${log.details + ' ' + log.eventType + ' ' + log.orderNumber}">
-                    <span class="text-slate-500 shrink-0 font-sans text-[11px]" th:text="${log.createdAt}">20:30:00</span>
-                    <span th:class="${log.status == 'SUCCESS' ? 'text-emerald-400 font-bold shrink-0' : (log.status == 'WARNING' ? 'text-amber-400 font-bold shrink-0' : 'text-indigo-400 font-bold shrink-0')}" th:text="'[' + ${log.eventType} + ']'">[EVENT]</span>
-                    <span class="text-slate-300 flex-grow leading-relaxed" th:text="${log.details}">Event details log text</span>
-                </div>
+                <!-- Rendered dynamically by JS -->
             </div>
         </div>
 
@@ -628,7 +509,7 @@
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-6">
             <div class="flex items-center justify-between border-b border-slate-800 pb-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl font-bold">
                         ⚡
                     </div>
                     <div>
@@ -641,45 +522,72 @@
                 </button>
             </div>
 
-            <div class="space-y-3 text-xs">
+            <!-- Instant 1-Click Presets -->
+            <div class="space-y-2.5">
+                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">1-Click Instant Failure Scenarios</p>
+                
                 <!-- Scenario 1: UPI Error -->
-                <button type="button" onclick="triggerSimScenario('upi')" class="w-full text-left bg-slate-950 hover:bg-slate-800/80 p-3.5 rounded-xl border border-slate-800 hover:border-indigo-500/50 transition cursor-pointer flex items-center justify-between group">
+                <button type="button" onclick="triggerSimScenario('upi')" class="w-full text-left bg-slate-950 hover:bg-slate-800/80 p-3 rounded-xl border border-slate-800 hover:border-indigo-500/50 transition cursor-pointer flex items-center justify-between group">
                     <div>
                         <p class="font-bold text-slate-200 group-hover:text-indigo-300">1. Simulate UPI Decline (₹5,200)</p>
                         <p class="text-[11px] text-slate-400 mt-0.5">Aarav Mehta • Triggers instant UPI Intent link generation</p>
                     </div>
-                    <span class="text-indigo-400 font-semibold text-xs">Run →</span>
+                    <span class="text-indigo-400 font-semibold text-xs shrink-0">Run →</span>
                 </button>
 
                 <!-- Scenario 2: Bank Gateway Timeout -->
-                <button type="button" onclick="triggerSimScenario('timeout')" class="w-full text-left bg-slate-950 hover:bg-slate-800/80 p-3.5 rounded-xl border border-slate-800 hover:border-indigo-500/50 transition cursor-pointer flex items-center justify-between group">
+                <button type="button" onclick="triggerSimScenario('timeout')" class="w-full text-left bg-slate-950 hover:bg-slate-800/80 p-3 rounded-xl border border-slate-800 hover:border-indigo-500/50 transition cursor-pointer flex items-center justify-between group">
                     <div>
                         <p class="font-bold text-slate-200 group-hover:text-indigo-300">2. Simulate Bank Gateway Timeout (₹4,500)</p>
                         <p class="text-[11px] text-slate-400 mt-0.5">Shruti Sharma • Triggers backup banking gateway fallback</p>
                     </div>
-                    <span class="text-indigo-400 font-semibold text-xs">Run →</span>
+                    <span class="text-indigo-400 font-semibold text-xs shrink-0">Run →</span>
                 </button>
 
                 <!-- Scenario 3: High-Value Abandonment (Incentive Trigger) -->
-                <button type="button" onclick="triggerSimScenario('highvalue')" class="w-full text-left bg-slate-950 hover:bg-slate-800/80 p-3.5 rounded-xl border border-slate-800 hover:border-indigo-500/50 transition cursor-pointer flex items-center justify-between group">
+                <button type="button" onclick="triggerSimScenario('highvalue')" class="w-full text-left bg-slate-950 hover:bg-slate-800/80 p-3 rounded-xl border border-slate-800 hover:border-indigo-500/50 transition cursor-pointer flex items-center justify-between group">
                     <div>
                         <p class="font-bold text-slate-200 group-hover:text-amber-300">3. Simulate VIP Cart Interruption (₹12,500)</p>
                         <p class="text-[11px] text-slate-400 mt-0.5">Rohan Verma • High-value VIP order qualifies for 10% coupon</p>
                     </div>
-                    <span class="text-amber-400 font-semibold text-xs">Run →</span>
+                    <span class="text-amber-400 font-semibold text-xs shrink-0">Run →</span>
                 </button>
             </div>
 
-            <div class="border-t border-slate-800 pt-4 flex justify-end">
-                <button type="button" onclick="closeSimulationModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition cursor-pointer">
-                    Close Lab
+            <!-- Custom Simulation Builder -->
+            <div class="pt-3 border-t border-slate-800 space-y-3">
+                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Custom Interruption Generator</p>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                        <label class="text-[10px] text-slate-400 block mb-1">Customer Name</label>
+                        <input type="text" id="customSimName" value="Kavita Reddy" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-slate-200 text-xs focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-slate-400 block mb-1">Amount (₹)</label>
+                        <input type="number" id="customSimAmount" value="3800" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-slate-200 text-xs focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[10px] text-slate-400 block mb-1">Failure Trigger</label>
+                    <select id="customSimReason" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-slate-200 text-xs focus:outline-none focus:border-indigo-500 cursor-pointer">
+                        <option value="UPI_DECLINED">UPI PSP Decline (Invalid PIN / App Timeout)</option>
+                        <option value="GATEWAY_TIMEOUT">Bank Gateway Outage / Server Timeout</option>
+                        <option value="INSUFFICIENT_FUNDS">Insufficient Funds / Card Limit Exceeded</option>
+                        <option value="AUTHENTICATION_FAILED">2FA OTP Verification Timeout</option>
+                        <option value="CHECKOUT_DISMISSED">Customer Checkout Session Interrupted</option>
+                    </select>
+                </div>
+                <button type="button" onclick="triggerCustomSim()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl transition cursor-pointer shadow">
+                    ⚡ Inject Custom Payment Failure
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Frontend Core Logic, Charting & Data Analyst Engine -->
+    <!-- Frontend Dynamic Core Logic & Reactive Engine -->
     <script>
+        let riskRecordsData = [];
+        let auditLogsData = [];
         let pageSize = 5;
         let currentPage = 1;
         let activeStatusFilter = 'ALL';
@@ -690,27 +598,112 @@
         let cadenceFunnelChartInstance = null;
         let autoRefreshTimer = null;
 
-        // Data arrays initialized from HTML DOM
-        function getAllRowElements() {
-            return Array.from(document.querySelectorAll('.pipeline-row'));
+        // Fetch latest state from API
+        function loadDashboardData(highlightOrderNumber = null) {
+            fetch('/admin/revenue-recovery/api/data')
+            .then(res => res.json())
+            .then(data => {
+                if (data) {
+                    riskRecordsData = data.riskRecords || [];
+                    auditLogsData = data.auditLogs || [];
+                    updateSummaryKPIs();
+                    renderTable(highlightOrderNumber);
+                    updateCharts();
+                    renderAuditLogs();
+                }
+            })
+            .catch(err => {
+                console.error('Error fetching data:', err);
+            });
         }
 
-        function getFilteredRows() {
-            const rows = getAllRowElements();
-            return rows.filter(row => {
-                const status = (row.getAttribute('data-status') || '').toUpperCase();
+        function updateSummaryKPIs() {
+            let totalAtRisk = 0;
+            let totalRecovered = 0;
+            let recoveredCount = 0;
+            let stoppedCount = 0;
+            let escalatedCount = 0;
+
+            riskRecordsData.forEach(r => {
+                const amt = parseFloat(r.amount) || 0;
+                totalAtRisk += amt;
+                const status = (r.status || '').toUpperCase();
+                if (status === 'RECOVERED') {
+                    totalRecovered += amt;
+                    recoveredCount++;
+                } else if (status === 'STOPPED') {
+                    stoppedCount++;
+                } else if (status === 'ESCALATED') {
+                    escalatedCount++;
+                }
+            });
+
+            const totalCount = riskRecordsData.length;
+            const activeCount = Math.max(0, totalCount - recoveredCount - stoppedCount - escalatedCount);
+            const recoveryRate = totalCount > 0 ? ((recoveredCount / totalCount) * 100).toFixed(1) : '0.0';
+            const avgRecovered = recoveredCount > 0 ? (totalRecovered / recoveredCount).toFixed(2) : '0.00';
+            const pipelineSaved = totalAtRisk > 0 ? ((totalRecovered / totalAtRisk) * 100).toFixed(1) : '0.0';
+
+            // Update Header & Banner
+            const hCount = document.getElementById('headerTotalCount');
+            if (hCount) hCount.innerText = totalCount;
+            const hRec = document.getElementById('headerTotalRecovered');
+            if (hRec) hRec.innerText = totalRecovered.toFixed(2);
+            const hRatio = document.getElementById('headerPipelineSavedPercentage');
+            if (hRatio) hRatio.innerText = pipelineSaved;
+
+            // Update KPI Cards
+            const kRisk = document.getElementById('kpiTotalAtRisk');
+            if (kRisk) kRisk.innerText = totalAtRisk.toFixed(2);
+            const kAct = document.getElementById('kpiActiveCount');
+            if (kAct) kAct.innerText = activeCount;
+            const kTot = document.getElementById('kpiTotalCount');
+            if (kTot) kTot.innerText = totalCount;
+
+            const kRec = document.getElementById('kpiTotalRecovered');
+            if (kRec) kRec.innerText = totalRecovered.toFixed(2);
+            const kAvg = document.getElementById('kpiAvgRecovered');
+            if (kAvg) kAvg.innerText = avgRecovered;
+
+            const kRate = document.getElementById('kpiRecoveryRate');
+            if (kRate) kRate.innerText = recoveryRate;
+            const kRatio = document.getElementById('kpiRecoveredRatio');
+            if (kRatio) kRatio.innerText = `${recoveredCount} of ${totalCount} Won`;
+            const kBar = document.getElementById('kpiProgressBar');
+            if (kBar) kBar.style.width = `${recoveryRate}%`;
+
+            const kStop = document.getElementById('kpiStoppedCount');
+            if (kStop) kStop.innerText = `${stoppedCount} Safely Stopped`;
+            const kEsc = document.getElementById('kpiEscalatedCount');
+            if (kEsc) kEsc.innerText = escalatedCount;
+
+            // Update tab counts
+            const tAll = document.getElementById('tabCountAll');
+            if (tAll) tAll.innerText = totalCount;
+            const tRec = document.getElementById('tabCountRecovered');
+            if (tRec) tRec.innerText = recoveredCount;
+            const tAct = document.getElementById('tabCountActive');
+            if (tAct) tAct.innerText = activeCount;
+            const tStop = document.getElementById('tabCountStopped');
+            if (tStop) tStop.innerText = stoppedCount;
+            const tEsc = document.getElementById('tabCountEscalated');
+            if (tEsc) tEsc.innerText = escalatedCount;
+        }
+
+        function getFilteredRecords() {
+            return riskRecordsData.filter(r => {
+                const status = (r.status || '').toUpperCase();
                 const text = (
-                    (row.getAttribute('data-order') || '') + ' ' +
-                    (row.getAttribute('data-customer') || '') + ' ' +
-                    (row.getAttribute('data-phone') || '') + ' ' +
-                    (row.getAttribute('data-email') || '') + ' ' +
-                    (row.getAttribute('data-amount') || '') + ' ' +
-                    (row.getAttribute('data-reason') || '') + ' ' +
-                    (row.getAttribute('data-code') || '') + ' ' +
-                    (row.getAttribute('data-action') || '')
+                    (r.orderNumber || '') + ' ' +
+                    (r.customerName || '') + ' ' +
+                    (r.customerPhone || '') + ' ' +
+                    (r.customerEmail || '') + ' ' +
+                    (r.amount || '') + ' ' +
+                    (r.failureReason || '') + ' ' +
+                    (r.failureCode || '') + ' ' +
+                    (r.actionTaken || '')
                 ).toLowerCase();
 
-                // Status filter
                 if (activeStatusFilter === 'RECOVERED' && status !== 'RECOVERED') return false;
                 if (activeStatusFilter === 'STOPPED' && status !== 'STOPPED') return false;
                 if (activeStatusFilter === 'ESCALATED' && status !== 'ESCALATED') return false;
@@ -718,33 +711,35 @@
                     if (status === 'RECOVERED' || status === 'STOPPED' || status === 'ESCALATED') return false;
                 }
 
-                // Search query
                 if (searchQuery && !text.includes(searchQuery.toLowerCase())) return false;
 
                 return true;
             });
         }
 
-        function sortRows(rows) {
-            return rows.sort((a, b) => {
-                const amountA = parseFloat(a.getAttribute('data-amount')) || 0;
-                const amountB = parseFloat(b.getAttribute('data-amount')) || 0;
-                const orderA = a.getAttribute('data-order') || '';
-                const orderB = b.getAttribute('data-order') || '';
+        function sortRecords(records) {
+            return records.sort((a, b) => {
+                const idA = a.id || 0;
+                const idB = b.id || 0;
+                const amountA = parseFloat(a.amount) || 0;
+                const amountB = parseFloat(b.amount) || 0;
 
                 if (sortOption === 'amount-high') return amountB - amountA;
                 if (sortOption === 'amount-low') return amountA - amountB;
-                if (sortOption === 'oldest') return orderA.localeCompare(orderB);
-                return orderB.localeCompare(orderA); // default newest
+                if (sortOption === 'oldest') return idA - idB;
+                return idB - idA; // default newest: highest ID first!
             });
         }
 
-        function renderTable() {
-            const allRows = getAllRowElements();
-            const filtered = sortRows(getFilteredRows());
+        function renderTable(highlightOrderNumber = null) {
+            const filtered = sortRecords(getFilteredRecords());
             const total = filtered.length;
-            const paginationContainer = document.getElementById('paginationContainer');
-            const noRecordsRow = document.getElementById('noRecordsRow');
+            const tbody = document.getElementById('pipelineTableBody');
+            if (!tbody) return;
+
+            if (highlightOrderNumber) {
+                currentPage = 1;
+            }
 
             const totalPages = Math.ceil(total / pageSize) || 1;
             if (currentPage > totalPages) currentPage = totalPages;
@@ -753,36 +748,40 @@
             const startIndex = (currentPage - 1) * pageSize;
             const endIndex = Math.min(startIndex + pageSize, total);
 
-            // Hide all rows initially
-            allRows.forEach(row => { row.style.display = 'none'; });
-
-            // Show current page filtered rows
-            filtered.forEach((row, index) => {
-                if (index >= startIndex && index < endIndex) {
-                    row.style.display = '';
+            if (total === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="py-16 text-center text-slate-500 text-sm">
+                            <div class="w-14 h-14 bg-slate-800 text-slate-400 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-inner">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <p class="font-semibold text-slate-200">No payment failures matching criteria</p>
+                            <p class="text-xs text-slate-500 mt-1">Try resetting filters or searching for another customer.</p>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tbody.innerHTML = '';
+                for (let i = startIndex; i < endIndex; i++) {
+                    const r = filtered[i];
+                    const isHighlighted = (highlightOrderNumber && r.orderNumber === highlightOrderNumber);
+                    const rowHtml = buildRowHtml(r, isHighlighted);
+                    tbody.innerHTML += rowHtml;
                 }
-            });
-
-            // Handle empty state
-            if (noRecordsRow) {
-                noRecordsRow.style.display = (total === 0) ? '' : 'none';
             }
 
             // Update pagination text
-            const pageRangeText = document.getElementById('pageRangeText');
-            if (pageRangeText) {
-                pageRangeText.innerText = total === 0 ? '0-0' : (startIndex + 1) + '-' + endIndex;
-            }
-
-            const totalRecordsText = document.getElementById('totalRecordsText');
-            if (totalRecordsText) {
-                totalRecordsText.innerText = total;
-            }
+            const pRange = document.getElementById('pageRangeText');
+            if (pRange) pRange.innerText = total === 0 ? '0-0' : (startIndex + 1) + '-' + endIndex;
+            const pTot = document.getElementById('totalRecordsText');
+            if (pTot) pTot.innerText = total;
 
             // Update buttons
             const prevBtn = document.getElementById('prevPageBtn');
-            const nextBtn = document.getElementById('nextPageBtn');
             if (prevBtn) prevBtn.disabled = (currentPage <= 1);
+            const nextBtn = document.getElementById('nextPageBtn');
             if (nextBtn) nextBtn.disabled = (currentPage >= totalPages);
 
             // Render page buttons
@@ -796,24 +795,135 @@
                     startPage = Math.max(1, endPage - maxButtons + 1);
                 }
 
-                for (let i = startPage; i <= endPage; i++) {
+                for (let p = startPage; p <= endPage; p++) {
                     const btn = document.createElement('button');
-                    btn.innerText = i;
+                    btn.innerText = p;
                     btn.type = 'button';
-                    btn.className = (i === currentPage)
+                    btn.className = (p === currentPage)
                         ? 'w-8 h-8 rounded-xl bg-indigo-600 border border-indigo-500 text-white text-xs font-bold transition shadow'
                         : 'w-8 h-8 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer';
-                    btn.onclick = () => { currentPage = i; renderTable(); };
+                    btn.onclick = () => { currentPage = p; renderTable(); };
                     btnContainer.appendChild(btn);
                 }
             }
+        }
+
+        function buildRowHtml(r, isHighlighted) {
+            const initial = (r.customerName && r.customerName.length > 0) ? r.customerName.charAt(0).toUpperCase() : 'C';
+            const amountFormatted = parseFloat(r.amount || 0).toFixed(2);
+            const isHighValue = parseFloat(r.amount || 0) >= 5000;
+            const status = (r.status || 'AT_RISK').toUpperCase();
+
+            let statusBadge = '';
+            if (status === 'RECOVERED') {
+                statusBadge = '<span class="bg-emerald-500/15 text-emerald-400 text-xs font-bold px-2.5 py-1 rounded-full border border-emerald-500/30">Won Back</span>';
+            } else if (status === 'STOPPED') {
+                statusBadge = '<span class="bg-amber-500/15 text-amber-400 text-xs font-bold px-2.5 py-1 rounded-full border border-amber-500/30">Stopped</span>';
+            } else if (status === 'REMINDER_SENT') {
+                statusBadge = '<span class="bg-indigo-500/15 text-indigo-400 text-xs font-bold px-2.5 py-1 rounded-full border border-indigo-500/30">Reminder Sent</span>';
+            } else if (status === 'FINAL_REMINDER_SENT') {
+                statusBadge = '<span class="bg-orange-500/15 text-orange-400 text-xs font-bold px-2.5 py-1 rounded-full border border-orange-500/30">Final Notice</span>';
+            } else if (status === 'ESCALATED') {
+                statusBadge = '<span class="bg-rose-500/15 text-rose-400 text-xs font-bold px-2.5 py-1 rounded-full border border-rose-500/30">Escalated</span>';
+            } else {
+                statusBadge = '<span class="bg-blue-500/15 text-blue-400 text-xs font-bold px-2.5 py-1 rounded-full border border-blue-500/30">In Pipeline</span>';
+            }
+
+            const canSimulate = (status !== 'RECOVERED' && status !== 'STOPPED');
+            const highlightClass = isHighlighted ? 'row-highlight ring-2 ring-emerald-500/80 bg-indigo-950/40' : '';
+
+            return `
+                <tr class="pipeline-row hover:bg-slate-800/50 transition cursor-pointer ${highlightClass}"
+                    onclick="openCaseModalById(${r.id})">
+                    
+                    <!-- Order ID -->
+                    <td class="py-4 px-4 font-mono font-bold text-white whitespace-nowrap align-middle">
+                        <div class="flex items-center gap-1.5 group">
+                            <span class="text-indigo-300 group-hover:text-indigo-200 transition">${escapeHtml(r.orderNumber)}</span>
+                            <button type="button" onclick="event.stopPropagation(); copyText('${escapeHtml(r.orderNumber)}', 'Order ID copied!')" class="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-white transition p-1" title="Copy Order ID">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+
+                    <!-- Customer Info -->
+                    <td class="py-4 px-4 align-middle">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-indigo-300 shrink-0">
+                                ${initial}
+                            </div>
+                            <div class="min-w-0">
+                                <p class="font-semibold text-slate-200 truncate">${escapeHtml(r.customerName || 'Customer')}</p>
+                                <p class="text-xs text-slate-400 truncate">${escapeHtml(r.customerPhone || '+91 9876543210')}</p>
+                            </div>
+                        </div>
+                    </td>
+
+                    <!-- Amount -->
+                    <td class="py-4 px-4 font-bold text-white text-base whitespace-nowrap align-middle">
+                        <div>
+                            <span>₹${amountFormatted}</span>
+                            ${isHighValue ? '<span class="block text-[10px] font-bold text-amber-400 uppercase tracking-tight">★ High Value</span>' : ''}
+                        </div>
+                    </td>
+
+                    <!-- Diagnosis -->
+                    <td class="py-4 px-4 align-middle">
+                        <div class="space-y-0.5">
+                            <p class="font-semibold text-slate-100 text-xs truncate" title="${escapeHtml(r.failureReason || '')}">
+                                ${escapeHtml(r.failureReason || 'Customer Checkout Session Interrupted')}
+                            </p>
+                            <span class="inline-block text-[10px] font-mono text-slate-400 bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800">
+                                ${escapeHtml(r.failureCode || 'CHECKOUT_DISMISSED')}
+                            </span>
+                        </div>
+                    </td>
+
+                    <!-- Action Taken -->
+                    <td class="py-4 px-4 align-middle">
+                        <div class="space-y-1">
+                            <p class="text-xs font-semibold text-slate-200 line-clamp-1" title="${escapeHtml(r.actionTaken || '')}">
+                                ${escapeHtml(r.actionTaken || 'Dispatched 1-click smart recovery route')}
+                            </p>
+                            <div class="flex items-center gap-2 text-[11px]">
+                                ${status === 'RECOVERED' ? '<span class="text-emerald-400 font-medium">✓ Won Back</span>' : ''}
+                                ${status === 'STOPPED' ? '<span class="text-amber-400 font-medium">Stopping Rule Satisfied</span>' : ''}
+                                ${(status === 'REMINDER_SENT' || status === 'FINAL_REMINDER_SENT') ? `<span class="text-indigo-300 font-medium">Stage ${r.cadenceStage || 1} Active</span>` : ''}
+                                ${r.appliedPromoCode ? `<span class="bg-emerald-500/10 text-emerald-400 font-bold px-1.5 py-0.2 rounded border border-emerald-500/20 text-[10px]">Coupon: ${escapeHtml(r.appliedPromoCode)}</span>` : ''}
+                            </div>
+                        </div>
+                    </td>
+
+                    <!-- Actions -->
+                    <td class="py-4 px-4 pr-6 text-right whitespace-nowrap align-middle">
+                        <div class="inline-flex items-center justify-end gap-2" onclick="event.stopPropagation()">
+                            ${statusBadge}
+                            ${canSimulate ? `
+                                <button type="button" 
+                                        onclick="simulateSuccess('${escapeHtml(r.orderNumber)}')" 
+                                        title="Simulate customer completing payment" 
+                                        class="text-[11px] font-semibold bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white px-2.5 py-1 rounded-lg border border-emerald-500/30 transition cursor-pointer">
+                                    Won Back
+                                </button>
+                            ` : ''}
+                            <button type="button" 
+                                    onclick="openCaseModalById(${r.id})" 
+                                    title="Open full diagnostic case file" 
+                                    class="text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-2.5 py-1 rounded-lg border border-slate-700 transition cursor-pointer">
+                                Case File
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
         }
 
         function setStatusFilter(filter) {
             activeStatusFilter = filter;
             currentPage = 1;
 
-            // Update active styling on tabs
             document.querySelectorAll('.filter-tab-btn').forEach(btn => {
                 if (btn.getAttribute('data-filter') === filter) {
                     btn.className = 'filter-tab-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white border border-indigo-500 transition cursor-pointer shadow';
@@ -868,14 +978,12 @@
             renderTable();
         }
 
-        // ==================== Charts & Visual Analytics ====================
-        function initCharts() {
-            const rows = getAllRowElements();
-            
-            // 1. Calculate Root Causes Distribution
+        // ==================== Charts ====================
+        function updateCharts() {
+            // 1. Root Cause Donut
             const causeCounts = {};
-            rows.forEach(r => {
-                let reason = r.getAttribute('data-reason') || 'Checkout Interrupted';
+            riskRecordsData.forEach(r => {
+                let reason = r.failureReason || 'Checkout Interrupted';
                 if (reason.includes('UPI')) reason = 'UPI Failure / VPA';
                 else if (reason.includes('Timeout') || reason.includes('Outage') || reason.includes('Gateway')) reason = 'Bank Server Timeout';
                 else if (reason.includes('Balance') || reason.includes('Limit') || reason.includes('Insufficient')) reason = 'Insufficient Funds';
@@ -887,7 +995,6 @@
 
             const causeLabels = Object.keys(causeCounts);
             const causeData = Object.values(causeCounts);
-
             const colors = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#06b6d4'];
 
             const ctxDonut = document.getElementById('rootCauseChart');
@@ -909,14 +1016,7 @@
                         maintainAspectRatio: false,
                         cutout: '70%',
                         plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        return ` ${context.label}: ${context.raw} cases`;
-                                    }
-                                }
-                            }
+                            legend: { display: false }
                         },
                         onClick: (evt, activeEls) => {
                             if (activeEls.length > 0) {
@@ -932,7 +1032,6 @@
                     }
                 });
 
-                // Render legend
                 const legendEl = document.getElementById('rootCauseLegend');
                 if (legendEl) {
                     legendEl.innerHTML = '';
@@ -947,10 +1046,10 @@
                 }
             }
 
-            // 2. Cadence Funnel Performance Chart
+            // 2. Cadence Funnel
             let stage0 = 0, stage1 = 0, stage2 = 0, stage3 = 0, stage4 = 0;
-            rows.forEach(r => {
-                const stage = parseInt(r.getAttribute('data-stage') || '0', 10);
+            riskRecordsData.forEach(r => {
+                const stage = parseInt(r.cadenceStage || 0, 10);
                 if (stage === 0) stage0++;
                 else if (stage === 1) stage1++;
                 else if (stage === 2) stage2++;
@@ -976,9 +1075,7 @@
                         indexAxis: 'y',
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false }
-                        },
+                        plugins: { legend: { display: false } },
                         scales: {
                             x: {
                                 grid: { color: 'rgba(51, 65, 85, 0.3)' },
@@ -1002,47 +1099,29 @@
             }
         }
 
-        // ==================== Modal Case File Handlers ====================
-        function openCaseModal(rowElement) {
-            if (!rowElement) return;
-            const order = rowElement.getAttribute('data-order');
-            const customer = rowElement.getAttribute('data-customer') || 'Valued Customer';
-            const phone = rowElement.getAttribute('data-phone') || '';
-            const email = rowElement.getAttribute('data-email') || '';
-            const amount = rowElement.getAttribute('data-amount') || '0.00';
-            const status = rowElement.getAttribute('data-status') || 'AT_RISK';
-            const reason = rowElement.getAttribute('data-reason') || 'Interrupted checkout';
-            const code = rowElement.getAttribute('data-code') || 'CHECKOUT_DISMISSED';
-            const stage = rowElement.getAttribute('data-stage') || '0';
-            const action = rowElement.getAttribute('data-action') || 'Dispatched smart fallback link';
-            const promo = rowElement.getAttribute('data-promo');
-            const link = rowElement.getAttribute('data-link') || `/checkout/recovery/${order}`;
+        // ==================== Case File Modal ====================
+        function openCaseModalById(id) {
+            const r = riskRecordsData.find(item => item.id === id);
+            if (!r) return;
 
-            activeModalOrder = { order, customer, phone, email, amount, status, reason, code, stage, action, promo, link };
+            activeModalOrder = r;
+            document.getElementById('modalOrderNumber').innerText = r.orderNumber;
+            document.getElementById('modalCustomerSummary').innerText = `${r.customerName || 'Customer'} • ${r.customerPhone || ''} ${r.customerEmail ? '• ' + r.customerEmail : ''}`;
+            document.getElementById('modalAmount').innerText = '₹' + parseFloat(r.amount || 0).toFixed(2);
+            document.getElementById('modalStatus').innerText = r.status || 'AT_RISK';
+            document.getElementById('modalStage').innerText = 'Stage ' + (r.cadenceStage || 0);
+            document.getElementById('modalPromo').innerText = r.appliedPromoCode ? r.appliedPromoCode : 'None';
+            document.getElementById('modalReason').innerText = r.failureReason || 'Interrupted Checkout';
+            document.getElementById('modalCode').innerText = r.failureCode || 'CHECKOUT_DISMISSED';
+            document.getElementById('modalActionDesc').innerText = r.actionTaken || 'Dispatched personalized recovery route';
 
-            document.getElementById('modalOrderNumber').innerText = order;
-            document.getElementById('modalCustomerSummary').innerText = `${customer} • ${phone} ${email ? '• ' + email : ''}`;
-            document.getElementById('modalAmount').innerText = '₹' + parseFloat(amount).toFixed(2);
-            document.getElementById('modalStatus').innerText = status;
-            document.getElementById('modalStage').innerText = 'Stage ' + stage;
-            document.getElementById('modalPromo').innerText = promo ? promo : 'None';
-            document.getElementById('modalReason').innerText = reason;
-            document.getElementById('modalCode').innerText = code;
-            document.getElementById('modalActionDesc').innerText = action;
-
-            // Handle action button visibility
-            const isResolved = (status === 'RECOVERED' || status === 'STOPPED');
+            const isResolved = (r.status === 'RECOVERED' || r.status === 'STOPPED');
             document.getElementById('modalSendReminderBtn').classList.toggle('hidden', isResolved);
             document.getElementById('modalSimulateSuccessBtn').classList.toggle('hidden', isResolved);
 
             const modal = document.getElementById('caseModal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-        }
-
-        function openCaseModalFromBtn(btn) {
-            const row = btn.closest('.pipeline-row');
-            if (row) openCaseModal(row);
         }
 
         function closeCaseModal() {
@@ -1053,25 +1132,25 @@
         }
 
         function copyRecoveryLinkFromModal() {
-            if (activeModalOrder && activeModalOrder.link) {
-                const fullUrl = window.location.origin + activeModalOrder.link;
-                copyText(fullUrl, 'Recovery link copied to clipboard!');
-            } else {
-                copyText(window.location.origin + '/checkout/recovery/' + (activeModalOrder ? activeModalOrder.order : ''), 'Recovery link copied!');
+            if (activeModalOrder && activeModalOrder.recoveryLink) {
+                copyText(activeModalOrder.recoveryLink, 'Recovery link copied to clipboard!');
+            } else if (activeModalOrder) {
+                copyText(window.location.origin + '/checkout/recovery/' + activeModalOrder.orderNumber, 'Recovery link copied!');
             }
         }
 
         function sendReminderFromModal() {
             if (!activeModalOrder) return;
-            const orderNum = activeModalOrder.order;
+            const orderNum = activeModalOrder.orderNumber;
             fetch('/admin/revenue-recovery/advance-stage?orderNumber=' + encodeURIComponent(orderNum), {
                 method: 'POST'
             })
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    showToast('Success: Stage ' + data.cadenceStage + ' reminder dispatched!', 'success');
-                    setTimeout(() => window.location.reload(), 1200);
+                    showToast(`✅ Stage ${data.cadenceStage} reminder dispatched for #${orderNum}!`, 'success');
+                    closeCaseModal();
+                    loadDashboardData(orderNum);
                 } else {
                     showToast(data.message || 'Could not advance cadence', 'warning');
                 }
@@ -1084,10 +1163,11 @@
 
         function simulateSuccessFromModal() {
             if (!activeModalOrder) return;
-            simulateSuccess(activeModalOrder.order);
+            simulateSuccess(activeModalOrder.orderNumber);
+            closeCaseModal();
         }
 
-        // ==================== 1-Click Operations & Actions ====================
+        // ==================== Simulation & Actions ====================
         function simulateSuccess(orderNumber) {
             fetch('/api/recovery/simulate-payment-success?orderNumber=' + encodeURIComponent(orderNumber), {
                 method: 'POST'
@@ -1095,8 +1175,8 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    showToast(`Payment Won Back! Recovered ₹${data.amountRecovered} for Order #${orderNumber}`, 'success');
-                    setTimeout(() => window.location.reload(), 1200);
+                    showToast(`🎉 Won Back! Recovered ₹${data.amountRecovered} for Order #${orderNumber}`, 'success');
+                    loadDashboardData(orderNumber);
                 } else {
                     showToast(data.message || 'Simulation could not be processed', 'warning');
                 }
@@ -1126,13 +1206,15 @@
             else if (type === 'timeout') url = '/api/recovery/simulate-gateway-timeout';
             else if (type === 'highvalue') url = '/api/recovery/simulate-insufficient-funds';
 
-            showToast('Simulating payment interruption & AI ingestion...', 'info');
+            showToast('⚡ Ingesting payment failure and running autonomous diagnosis...', 'info');
 
             fetch(url, { method: 'POST' })
             .then(res => res.json())
             .then(data => {
-                showToast(`Simulation Ingested! Diagnosed cause: ${data.diagnosedCause || 'Recorded'}`, 'success');
-                setTimeout(() => window.location.reload(), 1200);
+                if (data && data.orderNumber) {
+                    showToast(`✅ Ingested #${data.orderNumber} (₹${data.amount})! Diagnosis: ${data.diagnosedCause}`, 'success');
+                    loadDashboardData(data.orderNumber);
+                }
             })
             .catch(err => {
                 console.error(err);
@@ -1140,26 +1222,53 @@
             });
         }
 
+        function triggerCustomSim() {
+            const name = document.getElementById('customSimName').value || 'Customer';
+            const amount = document.getElementById('customSimAmount').value || '2500';
+            const reason = document.getElementById('customSimReason').value || 'GATEWAY_TIMEOUT';
+
+            closeSimulationModal();
+            showToast('⚡ Ingesting custom payment interruption...', 'info');
+
+            const params = new URLSearchParams({
+                customerName: name,
+                amount: amount,
+                failureCode: reason
+            });
+
+            fetch('/api/recovery/simulate-failure?' + params.toString(), { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.orderNumber) {
+                    showToast(`✅ Ingested #${data.orderNumber} (₹${data.amount}) for ${name}!`, 'success');
+                    loadDashboardData(data.orderNumber);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                showToast('Error injecting simulation', 'error');
+            });
+        }
+
         function exportDataToCSV() {
-            const rows = getAllRowElements();
-            if (!rows.length) {
+            if (!riskRecordsData.length) {
                 showToast('No records available to export', 'warning');
                 return;
             }
 
             let csv = 'Order ID,Customer Name,Phone,Email,Cart Amount,Diagnosis,Failure Code,Status,Cadence Stage,AI Action,Promo Code\n';
-            rows.forEach(r => {
-                const order = `"${r.getAttribute('data-order') || ''}"`;
-                const customer = `"${(r.getAttribute('data-customer') || '').replace(/"/g, '""')}"`;
-                const phone = `"${r.getAttribute('data-phone') || ''}"`;
-                const email = `"${r.getAttribute('data-email') || ''}"`;
-                const amount = r.getAttribute('data-amount') || '0';
-                const reason = `"${(r.getAttribute('data-reason') || '').replace(/"/g, '""')}"`;
-                const code = `"${r.getAttribute('data-code') || ''}"`;
-                const status = `"${r.getAttribute('data-status') || ''}"`;
-                const stage = `"${r.getAttribute('data-stage') || '0'}"`;
-                const action = `"${(r.getAttribute('data-action') || '').replace(/"/g, '""')}"`;
-                const promo = `"${r.getAttribute('data-promo') || ''}"`;
+            riskRecordsData.forEach(r => {
+                const order = `"${r.orderNumber || ''}"`;
+                const customer = `"${(r.customerName || '').replace(/"/g, '""')}"`;
+                const phone = `"${r.customerPhone || ''}"`;
+                const email = `"${r.customerEmail || ''}"`;
+                const amount = r.amount || '0';
+                const reason = `"${(r.failureReason || '').replace(/"/g, '""')}"`;
+                const code = `"${r.failureCode || ''}"`;
+                const status = `"${r.status || ''}"`;
+                const stage = `"${r.cadenceStage || '0'}"`;
+                const action = `"${(r.actionTaken || '').replace(/"/g, '""')}"`;
+                const promo = `"${r.appliedPromoCode || ''}"`;
 
                 csv += `${order},${customer},${phone},${email},${amount},${reason},${code},${status},${stage},${action},${promo}\n`;
             });
@@ -1175,7 +1284,34 @@
             showToast('Executive CSV Report downloaded successfully!', 'success');
         }
 
-        // ==================== Audit Log Filters ====================
+        // ==================== Audit Log ====================
+        function renderAuditLogs() {
+            const listEl = document.getElementById('auditLogList');
+            if (!listEl) return;
+
+            if (!auditLogsData.length) {
+                listEl.innerHTML = '<div class="text-slate-600 text-center py-6">Audit ledger is empty. Agent actions will log here step-by-step.</div>';
+                return;
+            }
+
+            listEl.innerHTML = '';
+            auditLogsData.forEach(log => {
+                let statusColor = 'text-indigo-400 font-bold shrink-0';
+                if (log.status === 'SUCCESS') statusColor = 'text-emerald-400 font-bold shrink-0';
+                else if (log.status === 'WARNING') statusColor = 'text-amber-400 font-bold shrink-0';
+
+                const timeFormatted = formatTime(log.createdAt);
+
+                listEl.innerHTML += `
+                    <div class="audit-log-item flex items-start gap-3 pb-2.5 border-b border-slate-900" data-text="${escapeHtml(log.details + ' ' + log.eventType + ' ' + (log.orderNumber || ''))}">
+                        <span class="text-slate-500 shrink-0 font-sans text-[11px]">${timeFormatted}</span>
+                        <span class="${statusColor}">[${escapeHtml(log.eventType || 'EVENT')}]</span>
+                        <span class="text-slate-300 flex-grow leading-relaxed">${escapeHtml(log.details || '')}</span>
+                    </div>
+                `;
+            });
+        }
+
         function filterAuditLogs() {
             const search = (document.getElementById('auditSearchInput')?.value || '').toLowerCase();
             const items = document.querySelectorAll('.audit-log-item');
@@ -1185,11 +1321,18 @@
             });
         }
 
-        function refreshAuditLogs() {
-            window.location.reload();
+        function formatTime(isoStr) {
+            if (!isoStr) return 'Just now';
+            try {
+                const d = new Date(isoStr);
+                if (isNaN(d.getTime())) return String(isoStr).substring(11, 19) || isoStr;
+                return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            } catch (e) {
+                return String(isoStr).substring(11, 19);
+            }
         }
 
-        // ==================== Auto-Refresh Controller ====================
+        // ==================== Auto-Refresh ====================
         function toggleAutoRefresh(seconds) {
             if (autoRefreshTimer) clearInterval(autoRefreshTimer);
             const sec = parseInt(seconds, 10);
@@ -1197,14 +1340,23 @@
             if (sec > 0) {
                 if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
                 autoRefreshTimer = setInterval(() => {
-                    window.location.reload();
+                    loadDashboardData();
                 }, sec * 1000);
             } else {
                 if (dot) dot.className = 'w-2 h-2 rounded-full bg-slate-500';
             }
         }
 
-        // ==================== Utility Functions & Toast ====================
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         function copyText(text, successMsg) {
             navigator.clipboard.writeText(text).then(() => {
                 showToast(successMsg || 'Copied to clipboard!', 'success');
@@ -1243,13 +1395,11 @@
             }, 3500);
         }
 
-        // Initialize on DOM load
+        // Initial fetch on boot
         document.addEventListener('DOMContentLoaded', () => {
-            renderTable();
-            initCharts();
+            loadDashboardData();
             toggleAutoRefresh(15);
         });
     </script>
 </body>
 </html>
-
