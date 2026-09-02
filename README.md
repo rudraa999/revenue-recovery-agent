@@ -142,7 +142,7 @@ CLOUDINARY_URL=cloudinary://your_api_key:your_api_secret@your_cloud_name
 `
 
 ### 3. Build & Run the Application
-`ash
+`Bash
 # Using Maven Wrapper (Windows PowerShell)
 .\mvnw.cmd clean spring-boot:run
 
