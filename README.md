@@ -1,4 +1,4 @@
-﻿# 🌸 RevWin — Autonomous Finance & Revenue Recovery Agent
+﻿# Revenue Recovery — Autonomous Finance & Revenue Recovery Agent
 ### *AI-Driven Autonomous Win-Back Intelligence & Razorpay Smart Recovery Engine for Modern E-Commerce*
 
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
@@ -14,7 +14,7 @@
 
 In modern e-commerce, **over 70% of potential sales are lost** due to unexpected payment failures, UPI PIN timeouts, bank gateway downtime, and shopping cart abandonments. Traditional merchant systems treat payment failure as a dead end, resulting in customer drop-off and lost marketing spend.
 
-**RevWin** is an enterprise-grade, autonomous revenue recovery agent built directly on top of the **Razorpay Payment Ecosystem**. When a transaction fails or a checkout is interrupted, RevWin instantly intercepts the event, performs **real-time granular root-cause diagnosis**, provisions a dynamic **1-Click Razorpay Smart Recovery Route**, and executes an **anti-fatigue automated win-back cadence** with tailored VIP incentives.
+**revenue recovery** is an enterprise-grade, autonomous revenue recovery agent built directly on top of the **Razorpay Payment Ecosystem**. When a transaction fails or a checkout is interrupted, revenue recovery instantly intercepts the event, performs **real-time granular root-cause diagnosis**, provisions a dynamic **1-Click Razorpay Smart Recovery Route**, and executes an **anti-fatigue automated win-back cadence** with tailored VIP incentives.
 
 > 🏆 **Built for the Razorpay Hackathon**: Transforming drop-offs into realized bank revenue autonomously with 0% customer spam.
 
@@ -172,5 +172,5 @@ The application will launch on: **http://localhost:8080**
 ## 👨‍💻 Author & Acknowledgements
 
 - **Developed for**: Razorpay Hackathon 2026
-- **Project**: RevWin Autonomous Finance Recovery Agent (*The Arts Arcade*)
+- **Project**: revenue recovery Autonomous Finance Recovery Agent (*The Arts Arcade*)
 - **License**: Released under the [MIT License](LICENSE).
