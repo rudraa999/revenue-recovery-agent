@@ -1,0 +1,18 @@
+agent will send reminder 3 times every 6houors after first 5minute 
+
+implement promocode thing.
+
+if order is above 10k agent will give discount of 10% promocode to use on 3rd time to attract the customer
+
+implement notification thing, user get notification if unordered cart is there , then attract with offers like -- instant delivery offers, discounts to make the user execute the order.
+
+agent will handle the big transactions 
+
+agent will able to talk with customer and agent will place order and redirecting u to the direct payment link.
+
+handle more scenarios like upi error, bank balance, etc, 
+
+
+
+improve ui , make more informative and easy to understand ui dashboard to get all the insights.
+
